@@ -38,7 +38,10 @@ async def register(
         await session.commit()
     except IntegrityError as exc:
         await session.rollback()
-        raise HTTPException(status_code=409, detail="An account with this email already exists.") from exc
+        raise HTTPException(
+            status_code=409,
+            detail="An account with this email already exists.",
+        ) from exc
     await session.refresh(user)
     return user
 

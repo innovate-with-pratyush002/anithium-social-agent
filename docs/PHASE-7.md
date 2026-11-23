@@ -20,7 +20,7 @@ Create a source through `POST /api/v1/sources` with:
 }
 ```
 
-Only active sources with `source_type = "rss"` are processed. Use direct RSS/Atom URLs. Redirects are not followed; configure the final feed URL directly. Localhost hostnames are rejected. The request timeout is 20 seconds and the response body is limited to 2 MB.
+Only active sources with `source_type = "rss"` are processed. Use direct RSS/Atom URLs. Redirects are not followed; configure the final feed URL directly. Localhost hostnames and hostnames resolving to non-public IP addresses are rejected. Feed URLs containing embedded credentials are rejected. The request timeout is 20 seconds and the response body is limited to 2 MB.
 
 ## Run ingestion
 

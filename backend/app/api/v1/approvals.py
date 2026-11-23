@@ -15,6 +15,7 @@ from app.schemas.approval import ApprovalDecisionRequest, ApprovalRead, Approval
 from app.schemas.common import PageMeta, PaginatedResponse
 
 router = APIRouter(
+    prefix="/approvals",
     tags=["Approvals"],
     dependencies=[Depends(require_admin)],
 )

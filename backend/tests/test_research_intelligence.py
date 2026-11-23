@@ -86,3 +86,58 @@ async def test_research_intelligence_requires_admin(client: AsyncClient) -> None
         headers={"Authorization": ""},
     )
     assert response.status_code == 401
+
+
+class FailingResearchAnalyzer:
+    provider = "test-provider"
+    model = "test-model"
+
+    async def analyze(self, item):
+        raise ValueError("Temporary provider response error")
+
+
+async def test_failed_analysis_retry_limit_is_enforced(client: AsyncClient) -> None:
+    research_id = await _create_research_item(client)
+    app.dependency_overrides[get_research_analyzer] = lambda: FailingResearchAnalyzer()
+    try:
+        for expected_attempt in (1, 2, 3):
+            response = await client.post(
+                "/api/v1/research-intelligence/analyze",
+                json={"research_item_ids": [research_id], "retry_failed": expected_attempt > 1},
+            )
+            assert response.status_code == 200
+            assert response.json()["failed"] == 1
+
+        exhausted = await client.post(
+            "/api/v1/research-intelligence/analyze",
+            json={"research_item_ids": [research_id], "retry_failed": True},
+        )
+        assert exhausted.status_code == 200
+        assert exhausted.json()["processed"] == 0
+    finally:
+        app.dependency_overrides.pop(get_research_analyzer, None)
+
+    item = await client.get(f"/api/v1/research-items/{research_id}")
+    assert item.json()["analysis_status"] == "failed"
+    assert item.json()["analysis_attempts"] == 3
+    assert item.json()["analysis_error"] == "Temporary provider response error"
+
+
+async def test_research_trends_require_two_analyzed_items(client: AsyncClient) -> None:
+    first_id = await _create_research_item(client)
+    second_id = await _create_research_item(client)
+    app.dependency_overrides[get_research_analyzer] = lambda: FakeResearchAnalyzer()
+    try:
+        response = await client.post(
+            "/api/v1/research-intelligence/analyze",
+            json={"research_item_ids": [first_id, second_id]},
+        )
+        assert response.status_code == 200
+        assert response.json()["analyzed"] == 2
+    finally:
+        app.dependency_overrides.pop(get_research_analyzer, None)
+
+    trends = await client.get("/api/v1/research-intelligence/trends")
+    assert trends.status_code == 200
+    assert trends.json()["trends"][0]["topic"] == "Artificial Intelligence"
+    assert trends.json()["trends"][0]["item_count"] == 2

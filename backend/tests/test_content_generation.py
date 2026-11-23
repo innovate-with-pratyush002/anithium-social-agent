@@ -137,8 +137,8 @@ def test_gemini_provider_can_be_selected_from_settings(monkeypatch) -> None:
 def test_selected_provider_requires_its_own_api_key(monkeypatch) -> None:
     from types import SimpleNamespace
 
-    import pytest
     from fastapi import HTTPException
+    import pytest
 
     import app.services.content_generation as service
 

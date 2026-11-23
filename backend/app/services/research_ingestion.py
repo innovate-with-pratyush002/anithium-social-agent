@@ -56,7 +56,6 @@ def _published_at(entry: Any) -> datetime | None:
     return None
 
 
-
 _TRACKING_QUERY_KEYS = {
     "fbclid",
     "gclid",

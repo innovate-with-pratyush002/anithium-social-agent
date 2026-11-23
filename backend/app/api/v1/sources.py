@@ -14,7 +14,9 @@ router = APIRouter(prefix="/sources", tags=["Sources"])
 
 @router.post("", response_model=SourceRead, status_code=status.HTTP_201_CREATED)
 async def create_source(payload: SourceCreate, session: AsyncSession = Depends(get_db_session)):
-    source = Source(**payload.model_dump(mode="json"))
+    data = payload.model_dump()
+    data["url"] = str(payload.url)
+    source = Source(**data)
     session.add(source)
     try:
         await session.commit()

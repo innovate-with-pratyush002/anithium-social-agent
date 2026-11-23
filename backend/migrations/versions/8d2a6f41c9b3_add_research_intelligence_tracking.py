@@ -18,7 +18,9 @@ depends_on: str | Sequence[str] | None = None
 def upgrade() -> None:
     op.add_column(
         "research_items",
-        sa.Column("analysis_status", sa.String(length=20), nullable=False, server_default="pending"),
+        sa.Column(
+            "analysis_status", sa.String(length=20), nullable=False, server_default="pending"
+        ),
     )
     op.add_column(
         "research_items",

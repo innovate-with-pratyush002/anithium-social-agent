@@ -1,11 +1,16 @@
 import uuid
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import CheckConstraint, ForeignKey, JSON, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 from app.models.mixins import TimestampMixin
+
+if TYPE_CHECKING:
+    from app.models.approval import Approval
+    from app.models.publishing_record import PublishingRecord
+    from app.models.research_item import ResearchItem
 
 
 class ContentDraft(TimestampMixin, Base):

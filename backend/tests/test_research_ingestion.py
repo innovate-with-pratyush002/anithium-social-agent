@@ -1,5 +1,6 @@
-from app.services import research_ingestion
 from httpx import AsyncClient
+
+from app.services import research_ingestion
 
 
 RSS_FEED = b"""<?xml version="1.0" encoding="UTF-8"?>

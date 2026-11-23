@@ -30,8 +30,8 @@ def test_content_draft_rejects_unsupported_platform() -> None:
         ContentDraftCreate(platform="threads", body="Hello world")
 
 
-def test_content_draft_defaults_to_draft_and_empty_collections() -> None:
+def test_content_draft_defaults_collections_and_keeps_status_server_managed() -> None:
     draft = ContentDraftCreate(platform="linkedin", body="Anithium update")
-    assert draft.status == "draft"
+    assert "status" not in ContentDraftCreate.model_fields
     assert draft.hashtags == []
     assert draft.media_urls == []

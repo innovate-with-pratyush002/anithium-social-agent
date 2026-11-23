@@ -76,7 +76,10 @@ async def update_source(
         await session.commit()
     except IntegrityError as exc:
         await session.rollback()
-        raise HTTPException(status_code=409, detail="A source with this URL already exists.") from exc
+        raise HTTPException(
+            status_code=409,
+            detail="A source with this URL already exists.",
+        ) from exc
     await session.refresh(source)
     return source
 

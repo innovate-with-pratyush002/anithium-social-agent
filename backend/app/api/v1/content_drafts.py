@@ -60,7 +60,7 @@ async def update_content_draft(
     draft = await session.get(ContentDraft, draft_id)
     if draft is None:
         raise HTTPException(status_code=404, detail="Content draft not found.")
-    for key, value in payload.model_dump(exclude_unset=True, mode="json").items():
+    for key, value in payload.model_dump(exclude_unset=True).items():
         setattr(draft, key, value)
     try:
         await session.commit()

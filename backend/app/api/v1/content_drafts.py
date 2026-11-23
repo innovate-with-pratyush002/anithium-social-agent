@@ -1,6 +1,8 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+
+from app.api.dependencies import get_current_user, require_admin
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,9 +12,10 @@ from app.models.content_draft import ContentDraft
 from app.schemas.common import PageMeta, PaginatedResponse
 from app.schemas.content_draft import ContentDraftCreate, ContentDraftRead, ContentDraftUpdate
 
-router = APIRouter(prefix="/content-drafts", tags=["Content Drafts"])
+router = APIRouter(
+    prefix="/content-drafts", tags=["Content Drafts"])
 
-@router.post("", response_model=ContentDraftRead, status_code=status.HTTP_201_CREATED)
+@router.post("", dependencies=[Depends(require_admin)], response_model=ContentDraftRead, status_code=status.HTTP_201_CREATED)
 async def create_content_draft(
     payload: ContentDraftCreate, session: AsyncSession = Depends(get_db_session)
 ):
@@ -60,7 +63,7 @@ async def get_content_draft(
         raise HTTPException(status_code=404, detail="Content draft not found.")
     return draft
 
-@router.patch("/{draft_id}", response_model=ContentDraftRead)
+@router.patch("/{draft_id}", dependencies=[Depends(require_admin)], response_model=ContentDraftRead)
 async def update_content_draft(
     draft_id: UUID, payload: ContentDraftUpdate, session: AsyncSession = Depends(get_db_session)
 ):
@@ -80,7 +83,7 @@ async def update_content_draft(
     await session.refresh(draft)
     return draft
 
-@router.delete("/{draft_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{draft_id}", dependencies=[Depends(require_admin)], status_code=status.HTTP_204_NO_CONTENT)
 async def delete_content_draft(
     draft_id: UUID, session: AsyncSession = Depends(get_db_session)
 ):

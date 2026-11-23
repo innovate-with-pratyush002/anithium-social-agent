@@ -4,9 +4,8 @@ import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.session import engine
+from app.db.session import engine, get_db_session
 from app.main import app
-from app.db.session import get_db_session
 
 
 @pytest_asyncio.fixture

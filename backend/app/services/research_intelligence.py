@@ -226,7 +226,10 @@ async def get_research_trends(
             )
             .group_by(ResearchItem.topic)
             .having(func.count(ResearchItem.id) >= 2)
-            .order_by(func.count(ResearchItem.id).desc(), func.avg(ResearchItem.relevance_score).desc())
+            .order_by(
+                func.count(ResearchItem.id).desc(),
+                func.avg(ResearchItem.relevance_score).desc(),
+            )
             .limit(limit)
         )
     ).all()

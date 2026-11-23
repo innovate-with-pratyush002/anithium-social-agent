@@ -20,6 +20,18 @@ router = APIRouter(
 )
 
 
+async def _load_approval(session: AsyncSession, approval_id: UUID) -> Approval:
+    result = await session.scalars(
+        select(Approval)
+        .options(selectinload(Approval.content_draft))
+        .where(Approval.id == approval_id)
+    )
+    approval = result.one_or_none()
+    if approval is None:
+        raise HTTPException(status_code=404, detail="Approval not found.")
+    return approval
+
+
 @router.post(
     "/content-drafts/{draft_id}/submit-for-approval",
     response_model=ApprovalRead,
@@ -56,10 +68,10 @@ async def submit_draft_for_approval(
         session.add(approval)
 
     draft.status = "pending_approval"
-    approval.content_draft = draft
+    await session.flush()
+    approval_id = approval.id
     await session.commit()
-    await session.refresh(approval)
-    return approval
+    return await _load_approval(session, approval_id)
 
 
 @router.get("", response_model=PaginatedResponse[ApprovalRead])
@@ -90,15 +102,7 @@ async def get_approval(
     approval_id: UUID,
     session: AsyncSession = Depends(get_db_session),
 ):
-    result = await session.scalars(
-        select(Approval)
-        .options(selectinload(Approval.content_draft))
-        .where(Approval.id == approval_id)
-    )
-    approval = result.one_or_none()
-    if approval is None:
-        raise HTTPException(status_code=404, detail="Approval not found.")
-    return approval
+    return await _load_approval(session, approval_id)
 
 
 @router.post("/{approval_id}/decision", response_model=ApprovalRead)
@@ -108,14 +112,7 @@ async def decide_approval(
     reviewer: User = Depends(require_admin),
     session: AsyncSession = Depends(get_db_session),
 ):
-    result = await session.scalars(
-        select(Approval)
-        .options(selectinload(Approval.content_draft))
-        .where(Approval.id == approval_id)
-    )
-    approval = result.one_or_none()
-    if approval is None:
-        raise HTTPException(status_code=404, detail="Approval not found.")
+    approval = await _load_approval(session, approval_id)
     if approval.status != "pending":
         raise HTTPException(
             status_code=409,
@@ -129,5 +126,4 @@ async def decide_approval(
     approval.content_draft.status = "approved" if payload.decision == "approved" else "draft"
 
     await session.commit()
-    await session.refresh(approval)
-    return approval
+    return await _load_approval(session, approval_id)

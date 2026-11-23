@@ -57,7 +57,8 @@ def _published_at(entry: Any) -> datetime | None:
 
 
 def _entry_hash(url: str | None, title: str, published_at: datetime | None) -> str:
-    identity = url or f"{title.strip().casefold()}|{published_at.isoformat() if published_at else ''}"
+    fallback = f"{title.strip().casefold()}|{published_at.isoformat() if published_at else ''}"
+    identity = url or fallback
     return hashlib.sha256(identity.encode("utf-8")).hexdigest()
 
 

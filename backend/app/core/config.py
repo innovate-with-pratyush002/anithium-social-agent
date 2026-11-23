@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Literal
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -14,8 +15,17 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://anithium:change-me@localhost:5432/anithium"
     log_level: str = "INFO"
     access_token_expire_minutes: int = Field(default=1440, ge=5, le=10080)
+
+    ai_provider: Literal["groq", "openai", "gemini"] = "groq"
+
+    groq_api_key: str | None = None
+    groq_model: str = "openai/gpt-oss-20b"
+
     openai_api_key: str | None = None
     openai_model: str = "gpt-4o-mini"
+
+    gemini_api_key: str | None = None
+    gemini_model: str = "gemini-2.5-flash"
 
     model_config = SettingsConfigDict(
         env_file=".env",

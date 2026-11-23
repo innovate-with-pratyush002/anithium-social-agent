@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
@@ -5,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db_session
 from app.models.source import Source
-from app.schemas.common import PageMeta, PaginatedResponse, validate_pagination
+from app.schemas.common import PageMeta, PaginatedResponse
 from app.schemas.source import SourceCreate, SourceRead, SourceUpdate
 
 router = APIRouter(prefix="/sources", tags=["Sources"])
@@ -29,7 +31,6 @@ async def list_sources(
     offset: int = Query(default=0, ge=0),
     session: AsyncSession = Depends(get_db_session),
 ):
-    limit, offset = validate_pagination(limit, offset)
     filters = [Source.is_active == active] if active is not None else []
     total = await session.scalar(select(func.count()).select_from(Source).where(*filters))
     result = await session.scalars(
@@ -38,7 +39,7 @@ async def list_sources(
     return {"items": result.all(), "pagination": PageMeta(total=total or 0, limit=limit, offset=offset)}
 
 @router.get("/{source_id}", response_model=SourceRead)
-async def get_source(source_id: str, session: AsyncSession = Depends(get_db_session)):
+async def get_source(source_id: UUID, session: AsyncSession = Depends(get_db_session)):
     source = await session.get(Source, source_id)
     if source is None:
         raise HTTPException(status_code=404, detail="Source not found.")
@@ -46,7 +47,7 @@ async def get_source(source_id: str, session: AsyncSession = Depends(get_db_sess
 
 @router.patch("/{source_id}", response_model=SourceRead)
 async def update_source(
-    source_id: str, payload: SourceUpdate, session: AsyncSession = Depends(get_db_session)
+    source_id: UUID, payload: SourceUpdate, session: AsyncSession = Depends(get_db_session)
 ):
     source = await session.get(Source, source_id)
     if source is None:
@@ -62,7 +63,7 @@ async def update_source(
     return source
 
 @router.delete("/{source_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def deactivate_source(source_id: str, session: AsyncSession = Depends(get_db_session)):
+async def deactivate_source(source_id: UUID, session: AsyncSession = Depends(get_db_session)):
     source = await session.get(Source, source_id)
     if source is None:
         raise HTTPException(status_code=404, detail="Source not found.")

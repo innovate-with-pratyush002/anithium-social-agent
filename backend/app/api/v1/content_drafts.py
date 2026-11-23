@@ -16,7 +16,7 @@ router = APIRouter(prefix="/content-drafts", tags=["Content Drafts"])
 async def create_content_draft(
     payload: ContentDraftCreate, session: AsyncSession = Depends(get_db_session)
 ):
-    draft = ContentDraft(**payload.model_dump(mode="json"))
+    draft = ContentDraft(**payload.model_dump())
     session.add(draft)
     try:
         await session.commit()

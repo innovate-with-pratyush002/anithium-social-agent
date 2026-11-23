@@ -9,8 +9,8 @@
 - Login issues a signed HS256 JWT access token.
 - Access-token lifetime is configurable with `ACCESS_TOKEN_EXPIRE_MINUTES` (default: 1440 minutes; allowed: 5–10080).
 - Protected APIs require `Authorization: Bearer <access_token>`.
-- All source, research-item, and content-draft endpoints require an active authenticated user.
-- Mutating those resources requires an administrator.
+- All source, research-item, and content-draft endpoints are administrator-only because they expose the private content workspace.
+- Regular registered users can authenticate and access their own account profile, but cannot read or mutate shared research and content data.
 - Newly registered users always receive `is_admin = false`; the public registration payload cannot set roles.
 - Source creation records the authenticated administrator as `created_by_id`.
 
@@ -19,7 +19,7 @@
 Public registration deliberately never grants administrator privileges. After registering the account that should own the installation, promote it manually from the trusted server:
 
 ```bash
-docker compose exec postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"
+docker compose exec postgres sh -lc 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
 ```
 
 Then, inside psql, run this query with the exact registered email:

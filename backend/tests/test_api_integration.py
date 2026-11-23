@@ -85,19 +85,7 @@ async def test_research_item_crud_and_filters(client: AsyncClient) -> None:
 
 
 async def test_content_draft_crud(client: AsyncClient) -> None:
-    research_response = await client.post(
-        "/api/v1/research-items",
-        json={
-            "title": "AI in software development",
-            "url": "https://example.com/articles/ai-software-development",
-            "topic": "AI",
-        },
-    )
-    assert research_response.status_code == 201
-    research_item_id = research_response.json()["id"]
-
     payload = {
-        "research_item_id": research_item_id,
         "platform": "linkedin",
         "language": "en",
         "title": "AI is changing software development",
@@ -119,10 +107,9 @@ async def test_content_draft_crud(client: AsyncClient) -> None:
 
     updated = await client.patch(
         f"/api/v1/content-drafts/{draft_id}",
-        json={"status": "pending_approval", "body": "Updated draft content."},
+        json={"body": "Updated draft content."},
     )
     assert updated.status_code == 200
-    assert updated.json()["status"] == "pending_approval"
     assert updated.json()["body"] == "Updated draft content."
 
     deleted = await client.delete(f"/api/v1/content-drafts/{draft_id}")

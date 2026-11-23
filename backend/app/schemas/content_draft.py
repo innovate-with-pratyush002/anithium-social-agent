@@ -11,6 +11,7 @@ DraftStatus = Literal[
     "draft", "pending_approval", "approved", "scheduled", "published", "failed", "archived"
 ]
 
+
 class ContentDraftCreate(BaseModel):
     research_item_id: UUID | None = None
     platform: Platform
@@ -20,7 +21,7 @@ class ContentDraftCreate(BaseModel):
     hashtags: list[str] = Field(default_factory=list)
     media_urls: list[str] = Field(default_factory=list)
     generation_metadata: dict[str, Any] = Field(default_factory=dict)
-    status: DraftStatus = "draft"
+
 
 class ContentDraftUpdate(BaseModel):
     research_item_id: UUID | None = None
@@ -31,17 +32,21 @@ class ContentDraftUpdate(BaseModel):
     hashtags: list[str] | None = None
     media_urls: list[str] | None = None
     generation_metadata: dict[str, Any] | None = None
-    status: DraftStatus | None = None
 
     @model_validator(mode="after")
     def reject_null_for_required_fields(self):
         for field in (
-            "platform", "language", "body", "hashtags", "media_urls",
-            "generation_metadata", "status",
+            "platform",
+            "language",
+            "body",
+            "hashtags",
+            "media_urls",
+            "generation_metadata",
         ):
             if field in self.model_fields_set and getattr(self, field) is None:
                 raise ValueError(f"{field} cannot be null.")
         return self
+
 
 class ContentDraftRead(ORMModel):
     id: UUID

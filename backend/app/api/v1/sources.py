@@ -1,24 +1,30 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+
+from app.api.dependencies import get_current_user, require_admin
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db_session
 from app.models.source import Source
+from app.models.user import User
 from app.schemas.common import PageMeta, PaginatedResponse
 from app.schemas.source import SourceCreate, SourceRead, SourceUpdate
 
-router = APIRouter(prefix="/sources", tags=["Sources"])
+router = APIRouter(
+    prefix="/sources", tags=["Sources"])
 
-@router.post("", response_model=SourceRead, status_code=status.HTTP_201_CREATED)
+@router.post("", dependencies=[Depends(require_admin)], response_model=SourceRead, status_code=status.HTTP_201_CREATED)
 async def create_source(
-    payload: SourceCreate, session: AsyncSession = Depends(get_db_session)
+    payload: SourceCreate,
+    session: AsyncSession = Depends(get_db_session),
+    admin: User = Depends(require_admin),
 ):
     data = payload.model_dump()
     data["url"] = str(payload.url)
-    source = Source(**data)
+    source = Source(**data, created_by_id=admin.id)
     session.add(source)
     try:
         await session.commit()
@@ -60,7 +66,7 @@ async def get_source(
         raise HTTPException(status_code=404, detail="Source not found.")
     return source
 
-@router.patch("/{source_id}", response_model=SourceRead)
+@router.patch("/{source_id}", dependencies=[Depends(require_admin)], response_model=SourceRead)
 async def update_source(
     source_id: UUID, payload: SourceUpdate, session: AsyncSession = Depends(get_db_session)
 ):
@@ -83,7 +89,7 @@ async def update_source(
     await session.refresh(source)
     return source
 
-@router.delete("/{source_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{source_id}", dependencies=[Depends(require_admin)], status_code=status.HTTP_204_NO_CONTENT)
 async def deactivate_source(
     source_id: UUID, session: AsyncSession = Depends(get_db_session)
 ):

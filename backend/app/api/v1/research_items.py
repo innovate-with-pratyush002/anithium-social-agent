@@ -84,7 +84,10 @@ async def update_research_item(
     except IntegrityError as exc:
         await session.rollback()
         raise HTTPException(
-            status_code=409, detail="The source, URL, or content hash conflicts with an existing record."
+            status_code=409,
+            detail=(
+                "The source, URL, or content hash conflicts with an existing record."
+            ),
         ) from exc
     await session.refresh(item)
     return item

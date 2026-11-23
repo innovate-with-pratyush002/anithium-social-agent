@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
@@ -5,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db_session
 from app.models.content_draft import ContentDraft
-from app.schemas.common import PageMeta, PaginatedResponse, validate_pagination
+from app.schemas.common import PageMeta, PaginatedResponse
 from app.schemas.content_draft import ContentDraftCreate, ContentDraftRead, ContentDraftUpdate
 
 router = APIRouter(prefix="/content-drafts", tags=["Content Drafts"])
@@ -32,7 +34,6 @@ async def list_content_drafts(
     offset: int = Query(default=0, ge=0),
     session: AsyncSession = Depends(get_db_session),
 ):
-    limit, offset = validate_pagination(limit, offset)
     filters = []
     if platform:
         filters.append(ContentDraft.platform == platform)
@@ -46,7 +47,7 @@ async def list_content_drafts(
     return {"items": result.all(), "pagination": PageMeta(total=total or 0, limit=limit, offset=offset)}
 
 @router.get("/{draft_id}", response_model=ContentDraftRead)
-async def get_content_draft(draft_id: str, session: AsyncSession = Depends(get_db_session)):
+async def get_content_draft(draft_id: UUID, session: AsyncSession = Depends(get_db_session)):
     draft = await session.get(ContentDraft, draft_id)
     if draft is None:
         raise HTTPException(status_code=404, detail="Content draft not found.")
@@ -54,7 +55,7 @@ async def get_content_draft(draft_id: str, session: AsyncSession = Depends(get_d
 
 @router.patch("/{draft_id}", response_model=ContentDraftRead)
 async def update_content_draft(
-    draft_id: str, payload: ContentDraftUpdate, session: AsyncSession = Depends(get_db_session)
+    draft_id: UUID, payload: ContentDraftUpdate, session: AsyncSession = Depends(get_db_session)
 ):
     draft = await session.get(ContentDraft, draft_id)
     if draft is None:
@@ -70,7 +71,7 @@ async def update_content_draft(
     return draft
 
 @router.delete("/{draft_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_content_draft(draft_id: str, session: AsyncSession = Depends(get_db_session)):
+async def delete_content_draft(draft_id: UUID, session: AsyncSession = Depends(get_db_session)):
     draft = await session.get(ContentDraft, draft_id)
     if draft is None:
         raise HTTPException(status_code=404, detail="Content draft not found.")

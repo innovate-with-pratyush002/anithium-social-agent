@@ -10,7 +10,8 @@ An AI-assisted social media research, content creation, approval, and publishing
 - JWT authentication with Argon2 password hashing
 - Admin-protected research, content draft, and approval APIs
 - Human approval workflow for generated content
-- Provider-based AI content generation (initial OpenAI adapter)
+- Provider-based AI content generation (Groq, OpenAI, and Gemini adapters)
+- Manual RSS/Atom research ingestion with URL/hash deduplication
 - Platform targets: LinkedIn, Instagram, and X
 
 ## Product decisions

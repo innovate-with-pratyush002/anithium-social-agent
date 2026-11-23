@@ -1,10 +1,10 @@
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class RegisterRequest(BaseModel):
-    email: str = Field(min_length=5, max_length=320)
+    email: EmailStr
     full_name: str = Field(min_length=1, max_length=160)
     password: str = Field(min_length=12, max_length=128)
 
@@ -21,6 +21,7 @@ class TokenResponse(BaseModel):
 
 
 class UserRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: UUID
     email: str
     full_name: str

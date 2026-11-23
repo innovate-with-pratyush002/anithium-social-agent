@@ -73,7 +73,10 @@ async def update_content_draft(
         await session.commit()
     except IntegrityError as exc:
         await session.rollback()
-        raise HTTPException(status_code=409, detail="The linked research item does not exist.") from exc
+        raise HTTPException(
+            status_code=409,
+            detail="The linked research item does not exist.",
+        ) from exc
     await session.refresh(draft)
     return draft
 

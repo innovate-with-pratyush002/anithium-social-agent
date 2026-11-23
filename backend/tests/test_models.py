@@ -1,5 +1,5 @@
-from app.db.base import Base
 from app import models  # noqa: F401 — import models to populate metadata.
+from app.db.base import Base
 
 
 def test_domain_models_register_expected_tables() -> None:
@@ -25,7 +25,13 @@ def test_approval_is_one_to_one_with_content_draft() -> None:
 
 def test_content_draft_platform_is_constrained() -> None:
     constraints = Base.metadata.tables["content_drafts"].constraints
-    check_sql = {str(constraint.sqltext) for constraint in constraints if hasattr(constraint, "sqltext")}
+    check_sql = {
+        str(constraint.sqltext)
+        for constraint in constraints
+        if hasattr(constraint, "sqltext")
+    }
 
-    assert any("linkedin" in expression and "instagram" in expression and "'x'" in expression
-               for expression in check_sql)
+    assert any(
+        "linkedin" in expression and "instagram" in expression and "'x'" in expression
+        for expression in check_sql
+    )

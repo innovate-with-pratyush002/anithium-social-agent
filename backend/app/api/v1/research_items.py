@@ -77,7 +77,11 @@ async def get_research_item(
         raise HTTPException(status_code=404, detail="Research item not found.")
     return item
 
-@router.patch("/{item_id}", dependencies=[Depends(require_admin)], response_model=ResearchItemRead)
+@router.patch(
+    "/{item_id}",
+    dependencies=[Depends(require_admin)],
+    response_model=ResearchItemRead,
+)
 async def update_research_item(
     item_id: UUID, payload: ResearchItemUpdate, session: AsyncSession = Depends(get_db_session)
 ):

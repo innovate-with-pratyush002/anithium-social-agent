@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.health import router as health_router
+from app.api.v1.auth import router as auth_router
 from app.api.v1.content_drafts import router as content_drafts_router
 from app.api.v1.research_items import router as research_items_router
 from app.api.v1.sources import router as sources_router
@@ -37,6 +38,7 @@ app.add_middleware(
     allow_headers=["Authorization", "Content-Type"],
 )
 app.include_router(health_router)
+app.include_router(auth_router, prefix=settings.api_v1_prefix)
 app.include_router(sources_router, prefix=settings.api_v1_prefix)
 app.include_router(research_items_router, prefix=settings.api_v1_prefix)
 app.include_router(content_drafts_router, prefix=settings.api_v1_prefix)

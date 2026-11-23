@@ -1,4 +1,5 @@
 from typing import Literal
+from uuid import UUID
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -8,7 +9,7 @@ Platform = Literal["linkedin", "instagram", "x"]
 
 
 class ContentGenerationRequest(BaseModel):
-    research_item_id: str
+    research_item_id: UUID
     platforms: list[Platform] = Field(min_length=1, max_length=3)
     language: str = Field(default="en", min_length=2, max_length=12)
     tone: str = Field(default="informative and engaging", min_length=3, max_length=120)

@@ -7,6 +7,7 @@
 - Failed analysis can be retried explicitly with retry_failed=true; an item is capped at three attempts.
 - Row-level skip-locked selection prevents concurrent workers from selecting the same pending item.
 - Ranked research now includes only completed analyses.
+- RSS article URLs are normalized by removing common tracking parameters, fragments, default ports, and harmless trailing-slash variations before deduplication.
 - A trend endpoint groups completed research by topic within a configurable discovery window. A topic is surfaced only after at least two items are found.
 
 ## API

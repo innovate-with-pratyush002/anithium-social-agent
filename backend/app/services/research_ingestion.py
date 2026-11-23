@@ -7,7 +7,6 @@ from email.utils import parsedate_to_datetime
 from html import unescape
 from typing import Any
 from urllib.parse import urlparse
-from uuid import UUID
 
 import feedparser
 import httpx
@@ -176,7 +175,7 @@ async def ingest_research(
             result.status = "failed"
             result.errors.append(str(exc)[:500])
             logger.warning("RSS ingestion failed for source %s: %s", source.id, exc)
-        except Exception as exc:
+        except Exception:
             result.status = "failed"
             result.errors.append("Unexpected ingestion error.")
             logger.exception("Unexpected RSS ingestion error for source %s", source.id)

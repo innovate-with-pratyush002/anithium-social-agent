@@ -56,7 +56,7 @@ async def generate_content(
                     body=post.body,
                     hashtags=post.hashtags,
                     generation_metadata={
-                        "provider": "openai",
+                        "provider": getattr(generator, "provider", "test-provider"),
                         "model": getattr(generator, "model", "test-provider"),
                         "research_item_id": str(research_item.id),
                     },

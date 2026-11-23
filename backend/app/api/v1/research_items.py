@@ -26,7 +26,8 @@ async def create_research_item(
     except IntegrityError as exc:
         await session.rollback()
         raise HTTPException(
-            status_code=409, detail="The source, URL, or content hash conflicts with an existing record."
+            status_code=409,
+            detail="The source, URL, or content hash conflicts with an existing record.",
         ) from exc
     await session.refresh(item)
     return item
@@ -52,10 +53,15 @@ async def list_research_items(
         select(ResearchItem).where(*filters).order_by(ResearchItem.discovered_at.desc())
         .limit(limit).offset(offset)
     )
-    return {"items": result.all(), "pagination": PageMeta(total=total or 0, limit=limit, offset=offset)}
+    return {
+        "items": result.all(),
+        "pagination": PageMeta(total=total or 0, limit=limit, offset=offset),
+    }
 
 @router.get("/{item_id}", response_model=ResearchItemRead)
-async def get_research_item(item_id: UUID, session: AsyncSession = Depends(get_db_session)):
+async def get_research_item(
+    item_id: UUID, session: AsyncSession = Depends(get_db_session)
+):
     item = await session.get(ResearchItem, item_id)
     if item is None:
         raise HTTPException(status_code=404, detail="Research item not found.")

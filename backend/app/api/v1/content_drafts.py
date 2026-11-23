@@ -17,6 +17,7 @@ router = APIRouter(
     dependencies=[Depends(require_admin)],
 )
 
+
 @router.post(
     "",
     response_model=ContentDraftRead,
@@ -37,6 +38,7 @@ async def create_content_draft(
     await session.refresh(draft)
     return draft
 
+
 @router.get("", response_model=PaginatedResponse[ContentDraftRead])
 async def list_content_drafts(
     platform: str | None = Query(default=None, max_length=20),
@@ -52,13 +54,17 @@ async def list_content_drafts(
         filters.append(ContentDraft.status == draft_status)
     total = await session.scalar(select(func.count()).select_from(ContentDraft).where(*filters))
     result = await session.scalars(
-        select(ContentDraft).where(*filters).order_by(ContentDraft.created_at.desc())
-        .limit(limit).offset(offset)
+        select(ContentDraft)
+        .where(*filters)
+        .order_by(ContentDraft.created_at.desc())
+        .limit(limit)
+        .offset(offset)
     )
     return {
         "items": result.all(),
         "pagination": PageMeta(total=total or 0, limit=limit, offset=offset),
     }
+
 
 @router.get("/{draft_id}", response_model=ContentDraftRead)
 async def get_content_draft(
@@ -68,6 +74,7 @@ async def get_content_draft(
     if draft is None:
         raise HTTPException(status_code=404, detail="Content draft not found.")
     return draft
+
 
 @router.patch(
     "/{draft_id}",
@@ -79,6 +86,11 @@ async def update_content_draft(
     draft = await session.get(ContentDraft, draft_id)
     if draft is None:
         raise HTTPException(status_code=404, detail="Content draft not found.")
+    if draft.status != "draft":
+        raise HTTPException(
+            status_code=409,
+            detail="Only drafts in draft status can be edited. Submit or review them first.",
+        )
     for key, value in payload.model_dump(exclude_unset=True).items():
         setattr(draft, key, value)
     try:
@@ -92,6 +104,7 @@ async def update_content_draft(
     await session.refresh(draft)
     return draft
 
+
 @router.delete(
     "/{draft_id}",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -102,6 +115,11 @@ async def delete_content_draft(
     draft = await session.get(ContentDraft, draft_id)
     if draft is None:
         raise HTTPException(status_code=404, detail="Content draft not found.")
+    if draft.status in {"pending_approval", "approved", "scheduled", "published"}:
+        raise HTTPException(
+            status_code=409,
+            detail="A draft in the current workflow state cannot be deleted.",
+        )
     await session.delete(draft)
     try:
         await session.commit()

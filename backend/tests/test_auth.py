@@ -34,6 +34,9 @@ async def test_registration_login_and_current_user(client: AsyncClient) -> None:
     assert current_user.json()["email"] == email
     assert current_user.json()["is_admin"] is False
 
+    forbidden_read = await client.get("/api/v1/sources")
+    assert forbidden_read.status_code == 403
+
     forbidden = await client.post(
         "/api/v1/sources",
         json={

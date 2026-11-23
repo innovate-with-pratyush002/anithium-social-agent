@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import get_current_user
+from app.core.config import get_settings
 from app.core.security import create_access_token, hash_password, verify_password
 from app.db.session import get_db_session
 from app.models.user import User
@@ -65,7 +66,7 @@ async def login(
     await session.commit()
     return TokenResponse(
         access_token=create_access_token(user.id),
-        expires_in=60 * 60 * 24,
+        expires_in=get_settings().access_token_expire_minutes * 60,
     )
 
 

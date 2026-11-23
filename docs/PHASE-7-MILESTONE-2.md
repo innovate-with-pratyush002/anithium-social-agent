@@ -16,7 +16,7 @@ Request:
       "max_items": 10
     }
 
-The endpoint processes up to 20 items per request. It selects items with status new and no relevance score. Each item is analyzed independently; a failed item does not stop the remaining batch.
+The endpoint processes up to 20 items per request. It selects items with status new and no relevance score. Optionally pass research_item_ids (up to 20 UUIDs) to analyze only a selected set; an empty list selects no items. Each item is analyzed independently; a failed item does not stop the remaining batch.
 
 The AI returns:
 - A concise summary based only on supplied title, feed summary/content and topic.

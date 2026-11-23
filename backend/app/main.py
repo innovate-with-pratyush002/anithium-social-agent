@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.health import router as health_router
+from app.api.v1.approvals import router as approvals_router
 from app.api.v1.auth import router as auth_router
 from app.api.v1.content_drafts import router as content_drafts_router
 from app.api.v1.research_items import router as research_items_router
@@ -19,10 +20,12 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s %(name)s %(message)s",
 )
 
+
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     yield
     await engine.dispose()
+
 
 app = FastAPI(
     title=settings.app_name,
@@ -42,6 +45,8 @@ app.include_router(auth_router, prefix=settings.api_v1_prefix)
 app.include_router(sources_router, prefix=settings.api_v1_prefix)
 app.include_router(research_items_router, prefix=settings.api_v1_prefix)
 app.include_router(content_drafts_router, prefix=settings.api_v1_prefix)
+app.include_router(approvals_router, prefix=settings.api_v1_prefix)
+
 
 @app.get("/", tags=["Root"])
 async def root() -> dict[str, str]:

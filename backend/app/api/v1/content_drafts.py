@@ -22,7 +22,9 @@ async def create_content_draft(
         await session.commit()
     except IntegrityError as exc:
         await session.rollback()
-        raise HTTPException(status_code=409, detail="The linked research item does not exist.") from exc
+        raise HTTPException(
+            status_code=409, detail="The linked research item does not exist."
+        ) from exc
     await session.refresh(draft)
     return draft
 
@@ -44,10 +46,15 @@ async def list_content_drafts(
         select(ContentDraft).where(*filters).order_by(ContentDraft.created_at.desc())
         .limit(limit).offset(offset)
     )
-    return {"items": result.all(), "pagination": PageMeta(total=total or 0, limit=limit, offset=offset)}
+    return {
+        "items": result.all(),
+        "pagination": PageMeta(total=total or 0, limit=limit, offset=offset),
+    }
 
 @router.get("/{draft_id}", response_model=ContentDraftRead)
-async def get_content_draft(draft_id: UUID, session: AsyncSession = Depends(get_db_session)):
+async def get_content_draft(
+    draft_id: UUID, session: AsyncSession = Depends(get_db_session)
+):
     draft = await session.get(ContentDraft, draft_id)
     if draft is None:
         raise HTTPException(status_code=404, detail="Content draft not found.")
@@ -71,7 +78,9 @@ async def update_content_draft(
     return draft
 
 @router.delete("/{draft_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_content_draft(draft_id: UUID, session: AsyncSession = Depends(get_db_session)):
+async def delete_content_draft(
+    draft_id: UUID, session: AsyncSession = Depends(get_db_session)
+):
     draft = await session.get(ContentDraft, draft_id)
     if draft is None:
         raise HTTPException(status_code=404, detail="Content draft not found.")

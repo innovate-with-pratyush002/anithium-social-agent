@@ -1,12 +1,11 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-
-from app.api.dependencies import get_current_user, require_admin
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.dependencies import get_current_user, require_admin
 from app.db.session import get_db_session
 from app.models.source import Source
 from app.models.user import User
@@ -14,9 +13,17 @@ from app.schemas.common import PageMeta, PaginatedResponse
 from app.schemas.source import SourceCreate, SourceRead, SourceUpdate
 
 router = APIRouter(
-    prefix="/sources", tags=["Sources"])
+    prefix="/sources",
+    tags=["Sources"],
+    dependencies=[Depends(get_current_user)],
+)
 
-@router.post("", dependencies=[Depends(require_admin)], response_model=SourceRead, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    dependencies=[Depends(require_admin)],
+    response_model=SourceRead,
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_source(
     payload: SourceCreate,
     session: AsyncSession = Depends(get_db_session),

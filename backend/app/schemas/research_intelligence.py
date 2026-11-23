@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 
 class ResearchIntelligenceRequest(BaseModel):
     max_items: int = Field(default=10, ge=1, le=20)
+    research_item_ids: list[UUID] | None = Field(default=None, max_length=20)
 
 
 class ResearchAnalysis(BaseModel):

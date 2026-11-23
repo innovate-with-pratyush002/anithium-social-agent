@@ -5,7 +5,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import require_admin
 from app.db.session import get_db_session
-from app.models.user import User
 from app.schemas.research_ingestion import (
     ResearchIngestionRequest,
     ResearchIngestionResponse,
@@ -27,6 +26,5 @@ router = APIRouter(
 async def run_research_ingestion(
     payload: ResearchIngestionRequest,
     session: Annotated[AsyncSession, Depends(get_db_session)],
-    _: Annotated[User, Depends(require_admin)],
 ) -> ResearchIngestionResponse:
     return await ingest_research(session, payload)

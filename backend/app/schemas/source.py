@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field, HttpUrl, model_validator
 
 from app.schemas.common import ORMModel
 
@@ -21,6 +21,13 @@ class SourceUpdate(BaseModel):
     description: str | None = None
     config: dict[str, Any] | None = None
     is_active: bool | None = None
+
+    @model_validator(mode="after")
+    def reject_null_for_required_fields(self):
+        for field in ("name", "source_type", "url", "config", "is_active"):
+            if field in self.model_fields_set and getattr(self, field) is None:
+                raise ValueError(f"{field} cannot be null.")
+        return self
 
 class SourceRead(ORMModel):
     id: UUID

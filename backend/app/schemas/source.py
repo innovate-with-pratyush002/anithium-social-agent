@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import Any
+from uuid import UUID
 
-from pydantic import Field, HttpUrl
+from pydantic import BaseModel, Field, HttpUrl
 
 from app.schemas.common import ORMModel
 
@@ -22,13 +23,13 @@ class SourceUpdate(BaseModel):
     is_active: bool | None = None
 
 class SourceRead(ORMModel):
-    id: str
+    id: UUID
     name: str
     source_type: str
     url: str
     description: str | None
     config: dict[str, Any]
     is_active: bool
-    created_by_id: str | None
+    created_by_id: UUID | None
     created_at: datetime
     updated_at: datetime

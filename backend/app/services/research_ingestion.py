@@ -8,7 +8,7 @@ from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
 from html import unescape
 from typing import Any
-from urllib.parse import urlparse
+from urllib.parse import parse_qsl, urlencode, urlparse, urlsplit, urlunsplit
 
 import feedparser
 import httpx
@@ -54,6 +54,35 @@ def _published_at(entry: Any) -> datetime | None:
         except (TypeError, ValueError, OverflowError):
             return None
     return None
+
+
+
+_TRACKING_QUERY_KEYS = {
+    "fbclid",
+    "gclid",
+    "mc_cid",
+    "mc_eid",
+}
+
+
+def normalize_article_url(value: str) -> str:
+    """Normalize harmless URL variations before storing an article reference."""
+    parsed = urlsplit(value.strip())
+    scheme = parsed.scheme.lower()
+    hostname = (parsed.hostname or "").lower()
+    port = parsed.port
+    netloc = hostname
+    if port and not ((scheme == "http" and port == 80) or (scheme == "https" and port == 443)):
+        netloc = f"{hostname}:{port}"
+    query = [
+        (key, val)
+        for key, val in parse_qsl(parsed.query, keep_blank_values=True)
+        if not key.lower().startswith("utm_") and key.lower() not in _TRACKING_QUERY_KEYS
+    ]
+    path = parsed.path or "/"
+    if path != "/":
+        path = path.rstrip("/")
+    return urlunsplit((scheme, netloc, path, urlencode(sorted(query)), ""))
 
 
 def _entry_hash(url: str | None, title: str, published_at: datetime | None) -> str:
@@ -144,6 +173,8 @@ async def ingest_research(
                     link = str(link).strip()
                     if urlparse(link).scheme not in {"http", "https"}:
                         link = None
+                    else:
+                        link = normalize_article_url(link)
                 summary = _plain_text(entry.get("summary") or entry.get("description"))
                 published_at = _published_at(entry)
                 content_hash = _entry_hash(link, title, published_at)

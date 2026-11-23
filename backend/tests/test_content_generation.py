@@ -86,3 +86,74 @@ async def test_generate_content_rejects_duplicate_platforms(client: AsyncClient)
         assert response.status_code == 422
     finally:
         app.dependency_overrides.pop(get_content_generator, None)
+
+
+def test_groq_provider_is_selected_from_settings(monkeypatch) -> None:
+    from types import SimpleNamespace
+
+    import app.services.content_generation as service
+
+    monkeypatch.setattr(
+        service,
+        "get_settings",
+        lambda: SimpleNamespace(
+            ai_provider="groq",
+            groq_api_key="test-groq-key",
+            groq_model="openai/gpt-oss-20b",
+        ),
+    )
+
+    generator = service.get_content_generator()
+
+    assert generator.provider == "groq"
+    assert generator.model == "openai/gpt-oss-20b"
+    assert str(generator.client.base_url).rstrip("/") == "https://api.groq.com/openai/v1"
+
+
+def test_gemini_provider_can_be_selected_from_settings(monkeypatch) -> None:
+    from types import SimpleNamespace
+
+    import app.services.content_generation as service
+
+    monkeypatch.setattr(
+        service,
+        "get_settings",
+        lambda: SimpleNamespace(
+            ai_provider="gemini",
+            gemini_api_key="test-gemini-key",
+            gemini_model="gemini-test-model",
+        ),
+    )
+
+    generator = service.get_content_generator()
+
+    assert generator.provider == "gemini"
+    assert generator.model == "gemini-test-model"
+    assert str(generator.client.base_url).rstrip("/") == (
+        "https://generativelanguage.googleapis.com/v1beta/openai"
+    )
+
+
+def test_selected_provider_requires_its_own_api_key(monkeypatch) -> None:
+    from types import SimpleNamespace
+
+    import pytest
+    from fastapi import HTTPException
+
+    import app.services.content_generation as service
+
+    monkeypatch.setattr(
+        service,
+        "get_settings",
+        lambda: SimpleNamespace(
+            ai_provider="groq",
+            groq_api_key=None,
+            groq_model="openai/gpt-oss-20b",
+        ),
+    )
+
+    with pytest.raises(HTTPException) as error:
+        service.get_content_generator()
+
+    assert error.value.status_code == 503
+    assert "GROQ_API_KEY" in error.value.detail

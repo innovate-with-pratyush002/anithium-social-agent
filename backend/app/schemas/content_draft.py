@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import Any, Literal
+from uuid import UUID
 
-from pydantic import Field
+from pydantic import BaseModel, Field
 
 from app.schemas.common import ORMModel
 
@@ -11,7 +12,7 @@ DraftStatus = Literal[
 ]
 
 class ContentDraftCreate(BaseModel):
-    research_item_id: str | None = None
+    research_item_id: UUID | None = None
     platform: Platform
     language: str = Field(default="en", min_length=2, max_length=12)
     title: str | None = Field(default=None, max_length=300)
@@ -22,7 +23,7 @@ class ContentDraftCreate(BaseModel):
     status: DraftStatus = "draft"
 
 class ContentDraftUpdate(BaseModel):
-    research_item_id: str | None = None
+    research_item_id: UUID | None = None
     platform: Platform | None = None
     language: str | None = Field(default=None, min_length=2, max_length=12)
     title: str | None = Field(default=None, max_length=300)
@@ -33,8 +34,8 @@ class ContentDraftUpdate(BaseModel):
     status: DraftStatus | None = None
 
 class ContentDraftRead(ORMModel):
-    id: str
-    research_item_id: str | None
+    id: UUID
+    research_item_id: UUID | None
     platform: str
     language: str
     title: str | None

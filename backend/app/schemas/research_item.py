@@ -55,6 +55,10 @@ class ResearchItemRead(ORMModel):
     language: str
     status: str
     relevance_score: float | None
+    analysis_status: str
+    analysis_attempts: int
+    analysis_error: str | None
+    analyzed_at: datetime | None
     published_at: datetime | None
     discovered_at: datetime
     metadata_json: dict[str, Any]

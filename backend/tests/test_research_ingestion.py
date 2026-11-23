@@ -1,6 +1,7 @@
 from httpx import AsyncClient
 
 from app.services import research_ingestion
+from app.services.research_ingestion import normalize_article_url
 
 RSS_FEED = b"""<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0"><channel><title>Example Tech</title>

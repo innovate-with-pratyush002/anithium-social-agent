@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, HttpUrl, model_validator
 
 from app.schemas.common import ORMModel
 
+
 class SourceCreate(BaseModel):
     name: str = Field(min_length=1, max_length=160)
     source_type: str = Field(min_length=1, max_length=30)
@@ -13,6 +14,8 @@ class SourceCreate(BaseModel):
     description: str | None = None
     config: dict[str, Any] = Field(default_factory=dict)
     is_active: bool = True
+
+
 
 class SourceUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=160)
@@ -28,6 +31,8 @@ class SourceUpdate(BaseModel):
             if field in self.model_fields_set and getattr(self, field) is None:
                 raise ValueError(f"{field} cannot be null.")
         return self
+
+
 
 class SourceRead(ORMModel):
     id: UUID

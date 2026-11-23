@@ -41,7 +41,7 @@ def upgrade() -> None:
     op.execute(
         "UPDATE research_items SET analysis_status = 'completed', "
         "analyzed_at = updated_at WHERE relevance_score IS NOT NULL "
-        "AND metadata_json ? 'intelligence'"
+        "AND (metadata_json::jsonb ? 'intelligence')"
     )
 
 

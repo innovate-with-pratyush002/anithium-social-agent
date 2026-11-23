@@ -11,12 +11,14 @@ from app.schemas.common import PageMeta, PaginatedResponse
 from app.schemas.research_intelligence import (
     ResearchIntelligenceRequest,
     ResearchIntelligenceResponse,
+    ResearchTrendsResponse,
 )
 from app.schemas.research_item import ResearchItemRead
 from app.services.research_intelligence import (
     ResearchAnalyzer,
     analyze_pending_research,
     get_research_analyzer,
+    get_research_trends,
 )
 
 router = APIRouter(
@@ -41,7 +43,7 @@ async def list_ranked_research(
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
 ):
-    filters = [ResearchItem.relevance_score.is_not(None)]
+    filters = [ResearchItem.analysis_status == "completed"]
     total = await session.scalar(
         select(func.count()).select_from(ResearchItem).where(*filters)
     )
@@ -56,3 +58,12 @@ async def list_ranked_research(
         "items": items.all(),
         "pagination": PageMeta(total=total or 0, limit=limit, offset=offset),
     }
+
+
+@router.get("/trends", response_model=ResearchTrendsResponse)
+async def list_research_trends(
+    session: Annotated[AsyncSession, Depends(get_db_session)],
+    window_days: int = Query(default=7, ge=1, le=90),
+    limit: int = Query(default=10, ge=1, le=50),
+) -> ResearchTrendsResponse:
+    return await get_research_trends(session, window_days=window_days, limit=limit)

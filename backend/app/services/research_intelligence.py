@@ -116,19 +116,19 @@ async def analyze_pending_research(
     analyzer: ResearchAnalyzer,
 ) -> ResearchIntelligenceResponse:
     started_at = datetime.now(UTC)
+    query = select(ResearchItem).where(
+        ResearchItem.status == "new",
+        ResearchItem.relevance_score.is_(None),
+    )
+    if payload.research_item_ids:
+        query = query.where(ResearchItem.id.in_(payload.research_item_ids))
     items = list(
         (
             await session.scalars(
-                select(ResearchItem)
-                .where(
-                    ResearchItem.status == "new",
-                    ResearchItem.relevance_score.is_(None),
-                )
-                .order_by(
+                query.order_by(
                     ResearchItem.published_at.desc().nullslast(),
                     ResearchItem.discovered_at.desc(),
-                )
-                .limit(payload.max_items)
+                ).limit(payload.max_items)
             )
         ).all()
     )

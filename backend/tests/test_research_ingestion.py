@@ -1,9 +1,5 @@
-from uuid import uuid4
-
 from httpx import AsyncClient
 
-from app.models.research_item import ResearchItem
-from app.models.source import Source
 from app.services import research_ingestion
 
 

@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
@@ -5,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.session import get_db_session
 from app.models.research_item import ResearchItem
-from app.schemas.common import PageMeta, PaginatedResponse, validate_pagination
+from app.schemas.common import PageMeta, PaginatedResponse
 from app.schemas.research_item import ResearchItemCreate, ResearchItemRead, ResearchItemUpdate
 
 router = APIRouter(prefix="/research-items", tags=["Research Items"])
@@ -30,12 +32,11 @@ async def create_research_item(
 async def list_research_items(
     item_status: str | None = Query(default=None, alias="status", max_length=24),
     topic: str | None = Query(default=None, max_length=120),
-    source_id: str | None = None,
+    source_id: UUID | None = None,
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
     session: AsyncSession = Depends(get_db_session),
 ):
-    limit, offset = validate_pagination(limit, offset)
     filters = []
     if item_status:
         filters.append(ResearchItem.status == item_status)
@@ -51,7 +52,7 @@ async def list_research_items(
     return {"items": result.all(), "pagination": PageMeta(total=total or 0, limit=limit, offset=offset)}
 
 @router.get("/{item_id}", response_model=ResearchItemRead)
-async def get_research_item(item_id: str, session: AsyncSession = Depends(get_db_session)):
+async def get_research_item(item_id: UUID, session: AsyncSession = Depends(get_db_session)):
     item = await session.get(ResearchItem, item_id)
     if item is None:
         raise HTTPException(status_code=404, detail="Research item not found.")
@@ -59,7 +60,7 @@ async def get_research_item(item_id: str, session: AsyncSession = Depends(get_db
 
 @router.patch("/{item_id}", response_model=ResearchItemRead)
 async def update_research_item(
-    item_id: str, payload: ResearchItemUpdate, session: AsyncSession = Depends(get_db_session)
+    item_id: UUID, payload: ResearchItemUpdate, session: AsyncSession = Depends(get_db_session)
 ):
     item = await session.get(ResearchItem, item_id)
     if item is None:

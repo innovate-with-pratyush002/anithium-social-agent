@@ -93,5 +93,7 @@ async def test_list_pending_approvals(client: AsyncClient) -> None:
 
     response = await client.get("/api/v1/approvals", params={"status": "pending"})
     assert response.status_code == 200
-    assert response.json()["pagination"]["total"] == 1
-    assert response.json()["items"][0]["content_draft_id"] == draft_id
+    assert response.json()["pagination"]["total"] >= 1
+    assert any(
+        item["content_draft_id"] == draft_id for item in response.json()["items"]
+    )

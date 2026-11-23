@@ -92,3 +92,10 @@ def test_local_feed_urls_are_rejected() -> None:
 
     with pytest.raises(ValueError):
         _validate_feed_url("http://localhost:8000/internal")
+
+
+def test_article_url_normalization_removes_tracking_variants() -> None:
+    normalized = normalize_article_url(
+        "HTTPS://Example.COM:443/ai-agents/?utm_source=newsletter&b=2&a=1#section"
+    )
+    assert normalized == "https://example.com/ai-agents?a=1&b=2"

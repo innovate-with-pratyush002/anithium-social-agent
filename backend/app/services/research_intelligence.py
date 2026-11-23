@@ -120,7 +120,7 @@ async def analyze_pending_research(
         ResearchItem.status == "new",
         ResearchItem.relevance_score.is_(None),
     )
-    if payload.research_item_ids:
+    if payload.research_item_ids is not None:
         query = query.where(ResearchItem.id.in_(payload.research_item_ids))
     items = list(
         (

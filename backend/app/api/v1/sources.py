@@ -73,7 +73,11 @@ async def get_source(
         raise HTTPException(status_code=404, detail="Source not found.")
     return source
 
-@router.patch("/{source_id}", dependencies=[Depends(require_admin)], response_model=SourceRead)
+@router.patch(
+    "/{source_id}",
+    dependencies=[Depends(require_admin)],
+    response_model=SourceRead,
+)
 async def update_source(
     source_id: UUID, payload: SourceUpdate, session: AsyncSession = Depends(get_db_session)
 ):
@@ -96,7 +100,11 @@ async def update_source(
     await session.refresh(source)
     return source
 
-@router.delete("/{source_id}", dependencies=[Depends(require_admin)], status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{source_id}",
+    dependencies=[Depends(require_admin)],
+    status_code=status.HTTP_204_NO_CONTENT,
+)
 async def deactivate_source(
     source_id: UUID, session: AsyncSession = Depends(get_db_session)
 ):

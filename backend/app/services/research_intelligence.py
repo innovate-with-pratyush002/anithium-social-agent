@@ -1,12 +1,12 @@
 import json
 import re
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from html import unescape
 from typing import Protocol
 
 from fastapi import HTTPException, status
 from openai import AsyncOpenAI, OpenAIError
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
@@ -16,8 +16,11 @@ from app.schemas.research_intelligence import (
     ResearchAnalysisResult,
     ResearchIntelligenceRequest,
     ResearchIntelligenceResponse,
+    ResearchTrend,
+    ResearchTrendsResponse,
 )
 
+MAX_ANALYSIS_ATTEMPTS = 3
 _PROVIDER_SETTINGS = {
     "groq": {
         "key_attribute": "groq_api_key",
@@ -116,9 +119,13 @@ async def analyze_pending_research(
     analyzer: ResearchAnalyzer,
 ) -> ResearchIntelligenceResponse:
     started_at = datetime.now(UTC)
+    allowed_statuses = ["pending"]
+    if payload.retry_failed:
+        allowed_statuses.append("failed")
     query = select(ResearchItem).where(
         ResearchItem.status == "new",
-        ResearchItem.relevance_score.is_(None),
+        ResearchItem.analysis_status.in_(allowed_statuses),
+        ResearchItem.analysis_attempts < MAX_ANALYSIS_ATTEMPTS,
     )
     if payload.research_item_ids is not None:
         query = query.where(ResearchItem.id.in_(payload.research_item_ids))
@@ -128,24 +135,31 @@ async def analyze_pending_research(
                 query.order_by(
                     ResearchItem.published_at.desc().nullslast(),
                     ResearchItem.discovered_at.desc(),
-                ).limit(payload.max_items)
+                )
+                .limit(payload.max_items)
+                .with_for_update(skip_locked=True)
             )
         ).all()
     )
 
     results: list[ResearchAnalysisResult] = []
     for item in items:
+        item.analysis_status = "processing"
+        item.analysis_attempts += 1
+        item.analysis_error = None
         try:
             analysis = await analyzer.analyze(item)
             item.summary = analysis.summary
             item.topic = analysis.topic
             item.language = analysis.language
             item.relevance_score = analysis.relevance_score
+            item.analysis_status = "completed"
+            item.analyzed_at = datetime.now(UTC)
             metadata = dict(item.metadata_json or {})
             metadata["intelligence"] = {
                 "provider": analyzer.provider,
                 "model": analyzer.model,
-                "analyzed_at": datetime.now(UTC).isoformat(),
+                "analyzed_at": item.analyzed_at.isoformat(),
                 "key_points": analysis.key_points,
             }
             item.metadata_json = metadata
@@ -158,21 +172,25 @@ async def analyze_pending_research(
                 )
             )
         except (OpenAIError, ValueError) as exc:
+            item.analysis_status = "failed"
+            item.analysis_error = str(exc)[:1000]
             results.append(
                 ResearchAnalysisResult(
                     research_item_id=item.id,
                     title=item.title,
                     status="failed",
-                    error=str(exc)[:300],
+                    error=item.analysis_error[:300],
                 )
             )
         except Exception:
+            item.analysis_status = "failed"
+            item.analysis_error = "Unexpected research analysis error."
             results.append(
                 ResearchAnalysisResult(
                     research_item_id=item.id,
                     title=item.title,
                     status="failed",
-                    error="Unexpected research analysis error.",
+                    error=item.analysis_error,
                 )
             )
 
@@ -189,10 +207,48 @@ async def analyze_pending_research(
     )
 
 
+async def get_research_trends(
+    session: AsyncSession, window_days: int = 7, limit: int = 10
+) -> ResearchTrendsResponse:
+    cutoff = datetime.now(UTC) - timedelta(days=window_days)
+    rows = (
+        await session.execute(
+            select(
+                ResearchItem.topic,
+                func.count(ResearchItem.id).label("item_count"),
+                func.avg(ResearchItem.relevance_score).label("average_relevance"),
+                func.max(ResearchItem.discovered_at).label("latest_discovered_at"),
+            )
+            .where(
+                ResearchItem.analysis_status == "completed",
+                ResearchItem.topic.is_not(None),
+                ResearchItem.discovered_at >= cutoff,
+            )
+            .group_by(ResearchItem.topic)
+            .having(func.count(ResearchItem.id) >= 2)
+            .order_by(func.count(ResearchItem.id).desc(), func.avg(ResearchItem.relevance_score).desc())
+            .limit(limit)
+        )
+    ).all()
+    return ResearchTrendsResponse(
+        window_days=window_days,
+        trends=[
+            ResearchTrend(
+                topic=row.topic,
+                item_count=row.item_count,
+                average_relevance=round(float(row.average_relevance or 0), 3),
+                latest_discovered_at=row.latest_discovered_at,
+            )
+            for row in rows
+        ],
+    )
+
+
 __all__ = [
     "ResearchAnalyzer",
     "OpenAICompatibleResearchAnalyzer",
     "analyze_pending_research",
     "clean_research_text",
     "get_research_analyzer",
+    "get_research_trends",
 ]

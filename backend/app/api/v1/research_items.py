@@ -68,7 +68,10 @@ async def update_research_item(
     item = await session.get(ResearchItem, item_id)
     if item is None:
         raise HTTPException(status_code=404, detail="Research item not found.")
-    for key, value in payload.model_dump(exclude_unset=True, mode="json").items():
+    changes = payload.model_dump(exclude_unset=True)
+    if changes.get("url") is not None:
+        changes["url"] = str(changes["url"])
+    for key, value in changes.items():
         setattr(item, key, value)
     try:
         await session.commit()

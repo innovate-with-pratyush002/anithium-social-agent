@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Index, String, Text, Uuid, func
+from sqlalchemy import JSON, DateTime, ForeignKey, Index, Integer, String, Text, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -17,6 +17,8 @@ class ResearchItem(TimestampMixin, Base):
     __tablename__ = "research_items"
     __table_args__ = (
         Index("ix_research_items_status_published_at", "status", "published_at"),
+        Index("ix_research_items_analysis_status", "analysis_status"),
+        Index("ix_research_items_topic_discovered", "topic", "discovered_at"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
@@ -32,6 +34,10 @@ class ResearchItem(TimestampMixin, Base):
     language: Mapped[str] = mapped_column(String(12), default="en", nullable=False)
     status: Mapped[str] = mapped_column(String(24), default="new", nullable=False)
     relevance_score: Mapped[float | None]
+    analysis_status: Mapped[str] = mapped_column(String(20), default="pending", nullable=False)
+    analysis_attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    analysis_error: Mapped[str | None] = mapped_column(Text)
+    analyzed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     discovered_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False

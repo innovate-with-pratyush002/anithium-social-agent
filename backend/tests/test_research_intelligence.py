@@ -19,24 +19,27 @@ class FakeResearchAnalyzer:
         )
 
 
-async def test_research_intelligence_analyzes_and_ranks_items(
-    client: AsyncClient,
-) -> None:
-    research = await client.post(
+async def _create_research_item(client: AsyncClient) -> str:
+    response = await client.post(
         "/api/v1/research-items",
         json={
             "title": "AI coding agents",
             "summary": "<p>Agents can help developers automate coding tasks.</p>",
         },
     )
-    assert research.status_code == 201
-    research_id = research.json()["id"]
+    assert response.status_code == 201
+    return response.json()["id"]
 
+
+async def test_research_intelligence_analyzes_and_ranks_items(
+    client: AsyncClient,
+) -> None:
+    research_id = await _create_research_item(client)
     app.dependency_overrides[get_research_analyzer] = lambda: FakeResearchAnalyzer()
     try:
         response = await client.post(
             "/api/v1/research-intelligence/analyze",
-            json={"max_items": 10},
+            json={"max_items": 1, "research_item_ids": [research_id]},
         )
         assert response.status_code == 200
         assert response.json()["analyzed"] == 1
@@ -56,14 +59,22 @@ async def test_research_intelligence_analyzes_and_ranks_items(
 async def test_research_intelligence_skips_already_analyzed_items(
     client: AsyncClient,
 ) -> None:
+    research_id = await _create_research_item(client)
     app.dependency_overrides[get_research_analyzer] = lambda: FakeResearchAnalyzer()
     try:
-        response = await client.post(
+        first = await client.post(
             "/api/v1/research-intelligence/analyze",
-            json={"max_items": 10},
+            json={"research_item_ids": [research_id]},
         )
-        assert response.status_code == 200
-        assert response.json()["processed"] == 0
+        assert first.status_code == 200
+        assert first.json()["analyzed"] == 1
+
+        second = await client.post(
+            "/api/v1/research-intelligence/analyze",
+            json={"research_item_ids": [research_id]},
+        )
+        assert second.status_code == 200
+        assert second.json()["processed"] == 0
     finally:
         app.dependency_overrides.pop(get_research_analyzer, None)
 

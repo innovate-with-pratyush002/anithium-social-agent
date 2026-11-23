@@ -41,7 +41,7 @@ def clean_research_text(value: str | None) -> str:
     if not value:
         return ""
     without_tags = re.sub(r"<[^>]*>", " ", value)
-    return unescape(re.sub(r"\\s+", " ", without_tags)).strip()
+    return unescape(re.sub(r"\s+", " ", without_tags)).strip()
 
 
 class ResearchAnalyzer(Protocol):

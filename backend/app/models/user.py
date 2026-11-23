@@ -1,11 +1,16 @@
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, DateTime, String, Uuid, func
+from sqlalchemy import Boolean, DateTime, String, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
 from app.models.mixins import TimestampMixin
+
+if TYPE_CHECKING:
+    from app.models.approval import Approval
+    from app.models.source import Source
 
 
 class User(TimestampMixin, Base):

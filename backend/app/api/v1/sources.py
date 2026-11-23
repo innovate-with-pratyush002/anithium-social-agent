@@ -5,7 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.dependencies import get_current_user, require_admin
+from app.api.dependencies import require_admin
 from app.db.session import get_db_session
 from app.models.source import Source
 from app.models.user import User
@@ -15,12 +15,11 @@ from app.schemas.source import SourceCreate, SourceRead, SourceUpdate
 router = APIRouter(
     prefix="/sources",
     tags=["Sources"],
-    dependencies=[Depends(get_current_user)],
+    dependencies=[Depends(require_admin)],
 )
 
 @router.post(
     "",
-    dependencies=[Depends(require_admin)],
     response_model=SourceRead,
     status_code=status.HTTP_201_CREATED,
 )
@@ -75,7 +74,6 @@ async def get_source(
 
 @router.patch(
     "/{source_id}",
-    dependencies=[Depends(require_admin)],
     response_model=SourceRead,
 )
 async def update_source(
@@ -102,7 +100,6 @@ async def update_source(
 
 @router.delete(
     "/{source_id}",
-    dependencies=[Depends(require_admin)],
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def deactivate_source(

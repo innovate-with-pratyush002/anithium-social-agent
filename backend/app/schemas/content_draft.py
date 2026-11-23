@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from app.schemas.common import ORMModel
 
@@ -32,6 +32,16 @@ class ContentDraftUpdate(BaseModel):
     media_urls: list[str] | None = None
     generation_metadata: dict[str, Any] | None = None
     status: DraftStatus | None = None
+
+    @model_validator(mode="after")
+    def reject_null_for_required_fields(self):
+        for field in (
+            "platform", "language", "body", "hashtags", "media_urls",
+            "generation_metadata", "status",
+        ):
+            if field in self.model_fields_set and getattr(self, field) is None:
+                raise ValueError(f"{field} cannot be null.")
+        return self
 
 class ContentDraftRead(ORMModel):
     id: UUID

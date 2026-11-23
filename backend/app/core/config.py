@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://anithium:change-me@localhost:5432/anithium"
     log_level: str = "INFO"
     access_token_expire_minutes: int = Field(default=1440, ge=5, le=10080)
+    openai_api_key: str | None = None
+    openai_model: str = "gpt-4o-mini"
 
     model_config = SettingsConfigDict(
         env_file=".env",

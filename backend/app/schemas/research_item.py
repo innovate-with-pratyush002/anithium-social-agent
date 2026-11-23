@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field, HttpUrl
+from pydantic import BaseModel, Field, HttpUrl, model_validator
 
 from app.schemas.common import ORMModel
 
@@ -35,6 +35,13 @@ class ResearchItemUpdate(BaseModel):
     relevance_score: float | None = Field(default=None, ge=0, le=1)
     published_at: datetime | None = None
     metadata_json: dict[str, Any] | None = None
+
+    @model_validator(mode="after")
+    def reject_null_for_required_fields(self):
+        for field in ("title", "language", "status", "metadata_json"):
+            if field in self.model_fields_set and getattr(self, field) is None:
+                raise ValueError(f"{field} cannot be null.")
+        return self
 
 class ResearchItemRead(ORMModel):
     id: UUID

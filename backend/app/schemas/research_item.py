@@ -1,14 +1,15 @@
 from datetime import datetime
 from typing import Any, Literal
+from uuid import UUID
 
-from pydantic import Field, HttpUrl
+from pydantic import BaseModel, Field, HttpUrl
 
 from app.schemas.common import ORMModel
 
 ResearchStatus = Literal["new", "reviewed", "rejected", "used"]
 
 class ResearchItemCreate(BaseModel):
-    source_id: str | None = None
+    source_id: UUID | None = None
     title: str = Field(min_length=1, max_length=500)
     url: HttpUrl | None = None
     summary: str | None = None
@@ -22,7 +23,7 @@ class ResearchItemCreate(BaseModel):
     metadata_json: dict[str, Any] = Field(default_factory=dict)
 
 class ResearchItemUpdate(BaseModel):
-    source_id: str | None = None
+    source_id: UUID | None = None
     title: str | None = Field(default=None, min_length=1, max_length=500)
     url: HttpUrl | None = None
     summary: str | None = None
@@ -36,8 +37,8 @@ class ResearchItemUpdate(BaseModel):
     metadata_json: dict[str, Any] | None = None
 
 class ResearchItemRead(ORMModel):
-    id: str
-    source_id: str | None
+    id: UUID
+    source_id: UUID | None
     title: str
     url: str | None
     summary: str | None

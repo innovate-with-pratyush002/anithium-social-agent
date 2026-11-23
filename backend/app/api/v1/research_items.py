@@ -1,6 +1,8 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+
+from app.api.dependencies import get_current_user, require_admin
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,9 +12,10 @@ from app.models.research_item import ResearchItem
 from app.schemas.common import PageMeta, PaginatedResponse
 from app.schemas.research_item import ResearchItemCreate, ResearchItemRead, ResearchItemUpdate
 
-router = APIRouter(prefix="/research-items", tags=["Research Items"])
+router = APIRouter(
+    prefix="/research-items", tags=["Research Items"])
 
-@router.post("", response_model=ResearchItemRead, status_code=status.HTTP_201_CREATED)
+@router.post("", dependencies=[Depends(require_admin)], response_model=ResearchItemRead, status_code=status.HTTP_201_CREATED)
 async def create_research_item(
     payload: ResearchItemCreate, session: AsyncSession = Depends(get_db_session)
 ):
@@ -67,7 +70,7 @@ async def get_research_item(
         raise HTTPException(status_code=404, detail="Research item not found.")
     return item
 
-@router.patch("/{item_id}", response_model=ResearchItemRead)
+@router.patch("/{item_id}", dependencies=[Depends(require_admin)], response_model=ResearchItemRead)
 async def update_research_item(
     item_id: UUID, payload: ResearchItemUpdate, session: AsyncSession = Depends(get_db_session)
 ):

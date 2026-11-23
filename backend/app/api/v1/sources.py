@@ -13,7 +13,9 @@ from app.schemas.source import SourceCreate, SourceRead, SourceUpdate
 router = APIRouter(prefix="/sources", tags=["Sources"])
 
 @router.post("", response_model=SourceRead, status_code=status.HTTP_201_CREATED)
-async def create_source(payload: SourceCreate, session: AsyncSession = Depends(get_db_session)):
+async def create_source(
+    payload: SourceCreate, session: AsyncSession = Depends(get_db_session)
+):
     data = payload.model_dump()
     data["url"] = str(payload.url)
     source = Source(**data)
@@ -22,7 +24,9 @@ async def create_source(payload: SourceCreate, session: AsyncSession = Depends(g
         await session.commit()
     except IntegrityError as exc:
         await session.rollback()
-        raise HTTPException(status_code=409, detail="A source with this URL already exists.") from exc
+        raise HTTPException(
+            status_code=409, detail="A source with this URL already exists."
+        ) from exc
     await session.refresh(source)
     return source
 
@@ -36,12 +40,21 @@ async def list_sources(
     filters = [Source.is_active == active] if active is not None else []
     total = await session.scalar(select(func.count()).select_from(Source).where(*filters))
     result = await session.scalars(
-        select(Source).where(*filters).order_by(Source.created_at.desc()).limit(limit).offset(offset)
+        select(Source)
+        .where(*filters)
+        .order_by(Source.created_at.desc())
+        .limit(limit)
+        .offset(offset)
     )
-    return {"items": result.all(), "pagination": PageMeta(total=total or 0, limit=limit, offset=offset)}
+    return {
+        "items": result.all(),
+        "pagination": PageMeta(total=total or 0, limit=limit, offset=offset),
+    }
 
 @router.get("/{source_id}", response_model=SourceRead)
-async def get_source(source_id: UUID, session: AsyncSession = Depends(get_db_session)):
+async def get_source(
+    source_id: UUID, session: AsyncSession = Depends(get_db_session)
+):
     source = await session.get(Source, source_id)
     if source is None:
         raise HTTPException(status_code=404, detail="Source not found.")
@@ -68,7 +81,9 @@ async def update_source(
     return source
 
 @router.delete("/{source_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def deactivate_source(source_id: UUID, session: AsyncSession = Depends(get_db_session)):
+async def deactivate_source(
+    source_id: UUID, session: AsyncSession = Depends(get_db_session)
+):
     source = await session.get(Source, source_id)
     if source is None:
         raise HTTPException(status_code=404, detail="Source not found.")

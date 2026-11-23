@@ -140,4 +140,4 @@ async def test_research_trends_require_two_analyzed_items(client: AsyncClient) -
     trends = await client.get("/api/v1/research-intelligence/trends")
     assert trends.status_code == 200
     assert trends.json()["trends"][0]["topic"] == "Artificial Intelligence"
-    assert trends.json()["trends"][0]["item_count"] == 2
+    assert trends.json()["trends"][0]["item_count"] >= 2

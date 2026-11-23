@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     cors_origins: list[str] = ["http://localhost:3000"]
     database_url: str = "postgresql+asyncpg://anithium:change-me@localhost:5432/anithium"
     log_level: str = "INFO"
+    access_token_expire_minutes: int = Field(default=1440, ge=5, le=10080)
 
     model_config = SettingsConfigDict(
         env_file=".env",

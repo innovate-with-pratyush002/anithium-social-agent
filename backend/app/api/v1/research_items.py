@@ -16,7 +16,10 @@ router = APIRouter(prefix="/research-items", tags=["Research Items"])
 async def create_research_item(
     payload: ResearchItemCreate, session: AsyncSession = Depends(get_db_session)
 ):
-    item = ResearchItem(**payload.model_dump(mode="json"))
+    data = payload.model_dump()
+    if payload.url is not None:
+        data["url"] = str(payload.url)
+    item = ResearchItem(**data)
     session.add(item)
     try:
         await session.commit()

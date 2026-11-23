@@ -11,6 +11,7 @@ from app.api.v1.auth import router as auth_router
 from app.api.v1.content_drafts import router as content_drafts_router
 from app.api.v1.content_generation import router as content_generation_router
 from app.api.v1.research_ingestion import router as research_ingestion_router
+from app.api.v1.research_intelligence import router as research_intelligence_router
 from app.api.v1.research_items import router as research_items_router
 from app.api.v1.sources import router as sources_router
 from app.core.config import get_settings
@@ -47,6 +48,7 @@ app.include_router(auth_router, prefix=settings.api_v1_prefix)
 app.include_router(sources_router, prefix=settings.api_v1_prefix)
 app.include_router(research_items_router, prefix=settings.api_v1_prefix)
 app.include_router(research_ingestion_router, prefix=settings.api_v1_prefix)
+app.include_router(research_intelligence_router, prefix=settings.api_v1_prefix)
 app.include_router(content_drafts_router, prefix=settings.api_v1_prefix)
 app.include_router(content_generation_router, prefix=settings.api_v1_prefix)
 app.include_router(approvals_router, prefix=settings.api_v1_prefix)

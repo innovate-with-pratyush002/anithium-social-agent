@@ -37,9 +37,9 @@ async def analyze_research(
 
 @router.get("/ranked", response_model=PaginatedResponse[ResearchItemRead])
 async def list_ranked_research(
+    session: Annotated[AsyncSession, Depends(get_db_session)],
     limit: int = Query(default=20, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
-    session: Annotated[AsyncSession, Depends(get_db_session)] = None,
 ):
     filters = [ResearchItem.relevance_score.is_not(None)]
     total = await session.scalar(

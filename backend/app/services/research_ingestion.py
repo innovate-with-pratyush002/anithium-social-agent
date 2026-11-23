@@ -1,7 +1,9 @@
 import asyncio
 import hashlib
+import ipaddress
 import logging
 import re
+import socket
 from datetime import UTC, datetime
 from email.utils import parsedate_to_datetime
 from html import unescape
@@ -63,6 +65,8 @@ def _validate_feed_url(url: str) -> None:
     parsed = urlparse(url)
     if parsed.scheme not in {"http", "https"} or not parsed.hostname:
         raise ValueError("RSS source URL must use HTTP or HTTPS.")
+    if parsed.username or parsed.password:
+        raise ValueError("RSS source URLs must not contain embedded credentials.")
     hostname = parsed.hostname.casefold()
     if hostname in {"localhost", "localhost.localdomain"} or hostname.endswith(".local"):
         raise ValueError("Local network RSS URLs are not allowed.")
@@ -70,6 +74,21 @@ def _validate_feed_url(url: str) -> None:
 
 async def _download_feed(url: str) -> bytes:
     _validate_feed_url(url)
+    parsed_url = urlparse(url)
+    hostname = parsed_url.hostname
+    assert hostname is not None
+    port = parsed_url.port or (443 if parsed_url.scheme == "https" else 80)
+    addresses = await asyncio.get_running_loop().getaddrinfo(
+        hostname,
+        port,
+        type=socket.SOCK_STREAM,
+    )
+    if not addresses:
+        raise ValueError("RSS source hostname did not resolve.")
+    for address in addresses:
+        ip = ipaddress.ip_address(address[4][0])
+        if not ip.is_global:
+            raise ValueError("RSS source resolves to a non-public network address.")
     timeout = httpx.Timeout(REQUEST_TIMEOUT_SECONDS)
     async with httpx.AsyncClient(
         timeout=timeout,

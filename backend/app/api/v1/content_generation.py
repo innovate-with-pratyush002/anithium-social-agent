@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from openai import OpenAIError
 from sqlalchemy import select
@@ -32,13 +30,8 @@ async def generate_content(
     session: AsyncSession = Depends(get_db_session),
     generator: ContentGenerator = Depends(get_content_generator),
 ):
-    try:
-        research_id = UUID(payload.research_item_id)
-    except ValueError:
-        raise HTTPException(status_code=422, detail="Invalid research_item_id.") from None
-
     research_item = await session.scalar(
-        select(ResearchItem).where(ResearchItem.id == research_id)
+        select(ResearchItem).where(ResearchItem.id == payload.research_item_id)
     )
     if research_item is None:
         raise HTTPException(status_code=404, detail="Research item not found.")

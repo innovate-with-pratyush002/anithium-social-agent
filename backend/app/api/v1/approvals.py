@@ -15,7 +15,6 @@ from app.schemas.approval import ApprovalDecisionRequest, ApprovalRead, Approval
 from app.schemas.common import PageMeta, PaginatedResponse
 
 router = APIRouter(
-    prefix="/approvals",
     tags=["Approvals"],
     dependencies=[Depends(require_admin)],
 )
@@ -75,7 +74,7 @@ async def submit_draft_for_approval(
     return await _load_approval(session, approval_id)
 
 
-@router.get("", response_model=PaginatedResponse[ApprovalRead])
+@router.get("/approvals", response_model=PaginatedResponse[ApprovalRead])
 async def list_approvals(
     approval_status: ApprovalStatus | None = Query(default=None, alias="status"),
     limit: int = Query(default=20, ge=1, le=100),
@@ -98,7 +97,7 @@ async def list_approvals(
     }
 
 
-@router.get("/{approval_id}", response_model=ApprovalRead)
+@router.get("/approvals/{approval_id}", response_model=ApprovalRead)
 async def get_approval(
     approval_id: UUID,
     session: AsyncSession = Depends(get_db_session),
@@ -106,7 +105,7 @@ async def get_approval(
     return await _load_approval(session, approval_id)
 
 
-@router.post("/{approval_id}/decision", response_model=ApprovalRead)
+@router.post("/approvals/{approval_id}/decision", response_model=ApprovalRead)
 async def decide_approval(
     approval_id: UUID,
     payload: ApprovalDecisionRequest,

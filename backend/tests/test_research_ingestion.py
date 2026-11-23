@@ -2,7 +2,6 @@ from httpx import AsyncClient
 
 from app.services import research_ingestion
 
-
 RSS_FEED = b"""<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0"><channel><title>Example Tech</title>
 <item><title>AI Agents Update</title><link>https://news.example.com/ai-agents</link>

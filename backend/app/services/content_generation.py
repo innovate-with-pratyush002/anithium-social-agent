@@ -1,7 +1,8 @@
 import json
 from typing import Protocol
 
-from openai import AsyncOpenAI, OpenAIError
+from fastapi import HTTPException, status
+from openai import AsyncOpenAI
 
 from app.core.config import get_settings
 from app.models.research_item import ResearchItem
@@ -87,8 +88,11 @@ class OpenAIContentGenerator:
 def get_content_generator() -> ContentGenerator:
     settings = get_settings()
     if not settings.openai_api_key:
-        raise RuntimeError("AI content generation is not configured. Set OPENAI_API_KEY.")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="AI content generation is not configured. Set OPENAI_API_KEY.",
+        )
     return OpenAIContentGenerator(settings.openai_api_key, settings.openai_model)
 
 
-__all__ = ["ContentGenerator", "OpenAIContentGenerator", "OpenAIError", "get_content_generator"]
+__all__ = ["ContentGenerator", "OpenAIContentGenerator", "get_content_generator"]

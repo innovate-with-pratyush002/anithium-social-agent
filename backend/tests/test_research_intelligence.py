@@ -47,7 +47,9 @@ async def test_research_intelligence_analyzes_and_ranks_items(
     finally:
         app.dependency_overrides.pop(get_research_analyzer, None)
 
-    ranked = await client.get("/api/v1/research-intelligence/ranked")
+    # The test database may contain older analyzed records; request the full
+    # bounded page so this newly analyzed item is not hidden by pagination.
+    ranked = await client.get("/api/v1/research-intelligence/ranked?limit=100")
     assert ranked.status_code == 200
     item = next(item for item in ranked.json()["items"] if item["id"] == research_id)
     assert item["summary"].startswith("Analysis summary")

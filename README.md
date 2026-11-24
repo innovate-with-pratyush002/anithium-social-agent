@@ -15,6 +15,7 @@ An AI-assisted social media research, content creation, approval, and publishing
 - Idempotent onboarding of curated official AI, developer, and arXiv research feeds
 - Scheduled AI research analysis with bounded retries and no auto-publishing
 - Platform targets: LinkedIn, Instagram, and X
+- Secure social-account token storage foundation with admin disconnect controls
 
 ## Product decisions
 

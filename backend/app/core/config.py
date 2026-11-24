@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://anithium:change-me@localhost:5432/anithium"
     log_level: str = "INFO"
     access_token_expire_minutes: int = Field(default=1440, ge=5, le=10080)
+    social_token_encryption_key: str | None = None
 
     research_ingestion_interval_minutes: int = Field(default=60, ge=5, le=1440)
     research_analysis_interval_minutes: int = Field(default=30, ge=5, le=1440)

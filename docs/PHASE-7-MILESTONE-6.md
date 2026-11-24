@@ -13,7 +13,7 @@ The seed script adds these eight sources:
 | OpenAI News | https://openai.com/news/rss.xml | 0.95 |
 | Google DeepMind Blog | https://deepmind.google/blog/rss.xml | 0.95 |
 | Google Research Blog | https://research.google/blog/rss/ | 0.95 |
-| Google AI Blog | https://blog.google/technology/ai/rss/ | 0.95 |
+| Google AI Blog | https://blog.google/innovation-and-ai/technology/ai/rss/ | 0.95 |
 | Hugging Face Blog | https://huggingface.co/blog/feed.xml | 0.90 |
 | NVIDIA Blog | https://blogs.nvidia.com/feed/ | 0.90 |
 | arXiv Artificial Intelligence | https://rss.arxiv.org/rss/cs.AI | 0.90 |

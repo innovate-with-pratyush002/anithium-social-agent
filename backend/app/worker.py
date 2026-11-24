@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from datetime import UTC, datetime
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
@@ -60,11 +61,7 @@ async def run_analysis_job() -> None:
         logger.exception("Scheduled research analysis job failed")
 
 
-async def main() -> None:
-    logging.basicConfig(
-        level=settings.log_level.upper(),
-        format="%(asctime)s %(levelname)s %(name)s %(message)s",
-    )
+def create_scheduler() -> AsyncIOScheduler:
     scheduler = AsyncIOScheduler(timezone="UTC")
     scheduler.add_job(
         run_ingestion_job,
@@ -74,6 +71,7 @@ async def main() -> None:
         max_instances=1,
         coalesce=True,
         misfire_grace_time=300,
+        next_run_time=datetime.now(UTC),
     )
     scheduler.add_job(
         run_analysis_job,
@@ -83,7 +81,17 @@ async def main() -> None:
         max_instances=1,
         coalesce=True,
         misfire_grace_time=300,
+        next_run_time=datetime.now(UTC),
     )
+    return scheduler
+
+
+async def main() -> None:
+    logging.basicConfig(
+        level=settings.log_level.upper(),
+        format="%(asctime)s %(levelname)s %(name)s %(message)s",
+    )
+    scheduler = create_scheduler()
     scheduler.start()
     logger.info(
         "Research worker started: ingestion every %s minutes; analysis every %s minutes",

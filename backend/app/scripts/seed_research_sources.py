@@ -55,7 +55,7 @@ SOURCE_CATALOG = (
     ),
     ResearchSourceDefinition(
         name="Google AI Blog",
-        url="https://blog.google/technology/ai/rss/",
+        url="https://blog.google/innovation-and-ai/technology/ai/rss/",
         description="Official Google AI product and technology announcements.",
         reliability_score=0.95,
         config={"topics": ["ai", "products", "models"], "source_kind": "official"},
@@ -65,12 +65,17 @@ SOURCE_CATALOG = (
         url="https://huggingface.co/blog/feed.xml",
         description="Hugging Face updates on open models, datasets, libraries, and tooling.",
         reliability_score=0.90,
-        config={"topics": ["open-source-ai", "models", "tools", "datasets"], "source_kind": "official"},
+        config={
+            "topics": ["open-source-ai", "models", "tools", "datasets"],
+            "source_kind": "official",
+        },
     ),
     ResearchSourceDefinition(
         name="NVIDIA Blog",
         url="https://blogs.nvidia.com/feed/",
-        description="Official NVIDIA announcements and articles across AI, computing, and software.",
+        description=(
+            "Official NVIDIA announcements and articles across AI, computing, and software."
+        ),
         reliability_score=0.90,
         config={"topics": ["ai", "hardware", "software", "computing"], "source_kind": "official"},
     ),
@@ -86,7 +91,10 @@ SOURCE_CATALOG = (
         url="https://rss.arxiv.org/rss/cs.LG",
         description="Research preprints in the arXiv Machine Learning category.",
         reliability_score=0.90,
-        config={"topics": ["machine-learning", "research", "papers"], "source_kind": "research_repository"},
+        config={
+            "topics": ["machine-learning", "research", "papers"],
+            "source_kind": "research_repository",
+        },
     ),
 )
 

@@ -53,6 +53,8 @@ async def test_research_intelligence_analyzes_and_ranks_items(
     assert item["summary"].startswith("Analysis summary")
     assert item["topic"] == "Artificial Intelligence"
     assert item["relevance_score"] == 0.92
+    assert 0 <= item["quality_score"] <= 1
+    assert "descriptive_title" in item["quality_signals"]
     assert item["metadata_json"]["intelligence"]["provider"] == "test-provider"
 
 

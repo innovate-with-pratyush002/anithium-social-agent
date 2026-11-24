@@ -54,9 +54,13 @@ async def test_create_list_and_cancel_schedule(client: AsyncClient) -> None:
     assert record["status"] == "queued"
     assert record["platform"] == "linkedin"
 
+    duplicate_time = scheduled_at + timedelta(hours=1)
     duplicate = await client.post(
         "/api/v1/publishing/schedules",
-        json={"content_draft_id": draft_id, "scheduled_at": (scheduled_at + timedelta(hours=1)).isoformat()},
+        json={
+            "content_draft_id": draft_id,
+            "scheduled_at": duplicate_time.isoformat(),
+        },
     )
     assert duplicate.status_code == 409
 

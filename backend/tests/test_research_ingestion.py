@@ -46,6 +46,11 @@ async def test_rss_ingestion_creates_research_items_and_deduplicates(
     assert first.json()["duplicates"] == 0
     assert first.json()["results"][0]["status"] == "success"
 
+    items = await client.get("/api/v1/research-items", params={"source_id": source_id})
+    research_item = items.json()["items"][0]
+    assert 0 <= research_item["quality_score"] <= 1
+    assert "article_url_available" in research_item["quality_signals"]
+
     second = await client.post(
         "/api/v1/research-ingestion/run",
         json={"source_ids": [source_id], "max_items_per_source": 10},

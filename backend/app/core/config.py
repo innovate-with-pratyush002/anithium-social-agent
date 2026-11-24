@@ -16,6 +16,11 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     access_token_expire_minutes: int = Field(default=1440, ge=5, le=10080)
 
+    research_ingestion_interval_minutes: int = Field(default=60, ge=5, le=1440)
+    research_analysis_interval_minutes: int = Field(default=30, ge=5, le=1440)
+    research_ingestion_max_items_per_source: int = Field(default=20, ge=1, le=50)
+    research_analysis_max_items: int = Field(default=10, ge=1, le=20)
+
     ai_provider: Literal["groq", "openai", "gemini"] = "groq"
 
     groq_api_key: str | None = None

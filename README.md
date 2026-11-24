@@ -11,7 +11,8 @@ An AI-assisted social media research, content creation, approval, and publishing
 - Admin-protected research, content draft, and approval APIs
 - Human approval workflow for generated content
 - Provider-based AI content generation (Groq, OpenAI, and Gemini adapters)
-- Manual RSS/Atom research ingestion with URL/hash deduplication
+- Manual and scheduled RSS/Atom research ingestion with URL/hash deduplication
+- Scheduled AI research analysis with bounded retries and no auto-publishing
 - Platform targets: LinkedIn, Instagram, and X
 
 ## Product decisions

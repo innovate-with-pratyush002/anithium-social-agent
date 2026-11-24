@@ -8,6 +8,7 @@ from app.schemas.common import ORMModel
 
 ResearchStatus = Literal["new", "reviewed", "rejected", "used"]
 
+
 class ResearchItemCreate(BaseModel):
     source_id: UUID | None = None
     title: str = Field(min_length=1, max_length=500)
@@ -21,6 +22,7 @@ class ResearchItemCreate(BaseModel):
     relevance_score: float | None = Field(default=None, ge=0, le=1)
     published_at: datetime | None = None
     metadata_json: dict[str, Any] = Field(default_factory=dict)
+
 
 class ResearchItemUpdate(BaseModel):
     source_id: UUID | None = None
@@ -43,6 +45,7 @@ class ResearchItemUpdate(BaseModel):
                 raise ValueError(f"{field} cannot be null.")
         return self
 
+
 class ResearchItemRead(ORMModel):
     id: UUID
     source_id: UUID | None
@@ -55,6 +58,8 @@ class ResearchItemRead(ORMModel):
     language: str
     status: str
     relevance_score: float | None
+    quality_score: float | None
+    quality_signals: list[str]
     analysis_status: str
     analysis_attempts: int
     analysis_error: str | None

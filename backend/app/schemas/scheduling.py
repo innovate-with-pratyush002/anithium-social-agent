@@ -3,7 +3,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, field_validator
 
-from app.schemas.common import PageMeta
+from app.schemas.common import ORMModel, PageMeta
 
 Platform = str
 
@@ -22,7 +22,7 @@ class ScheduleCreate(BaseModel):
         return value.astimezone(UTC)
 
 
-class ScheduleRead(BaseModel):
+class ScheduleRead(ORMModel):
     id: UUID
     content_draft_id: UUID
     platform: str

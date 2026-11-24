@@ -23,7 +23,7 @@ async def _create_research_item(client: AsyncClient) -> str:
     response = await client.post(
         "/api/v1/research-items",
         json={
-            "title": "AI coding agents",
+            "title": "AI coding agents for modern developers",
             "summary": "<p>Agents can help developers automate coding tasks.</p>",
         },
     )

@@ -10,6 +10,7 @@ from app.api.v1.approvals import router as approvals_router
 from app.api.v1.auth import router as auth_router
 from app.api.v1.content_drafts import router as content_drafts_router
 from app.api.v1.content_generation import router as content_generation_router
+from app.api.v1.editorial import router as editorial_router
 from app.api.v1.research_ingestion import router as research_ingestion_router
 from app.api.v1.research_intelligence import router as research_intelligence_router
 from app.api.v1.research_items import router as research_items_router
@@ -51,6 +52,7 @@ app.include_router(research_ingestion_router, prefix=settings.api_v1_prefix)
 app.include_router(research_intelligence_router, prefix=settings.api_v1_prefix)
 app.include_router(content_drafts_router, prefix=settings.api_v1_prefix)
 app.include_router(content_generation_router, prefix=settings.api_v1_prefix)
+app.include_router(editorial_router, prefix=settings.api_v1_prefix)
 app.include_router(approvals_router, prefix=settings.api_v1_prefix)
 
 

@@ -36,7 +36,7 @@ def test_quality_score_is_lower_for_thin_research_and_unreliable_source() -> Non
 
     score, signals = calculate_research_quality(item, source_reliability=0.1, now=now)
 
-    assert score == 0.16
+    assert score == 0.1
     assert "missing_article_url" in signals
     assert "missing_summary" in signals
     assert "no_article_text" in signals

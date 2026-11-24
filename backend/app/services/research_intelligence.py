@@ -11,6 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import get_settings
 from app.models.research_item import ResearchItem
+from app.models.source import Source
+from app.services.research_quality import calculate_research_quality
 from app.schemas.research_intelligence import (
     ResearchAnalysis,
     ResearchAnalysisResult,
@@ -153,6 +155,16 @@ async def analyze_pending_research(
             item.topic = analysis.topic
             item.language = analysis.language
             item.relevance_score = analysis.relevance_score
+            source_reliability = 0.7
+            if item.source_id is not None:
+                stored_reliability = await session.scalar(
+                    select(Source.reliability_score).where(Source.id == item.source_id)
+                )
+                if stored_reliability is not None:
+                    source_reliability = stored_reliability
+            item.quality_score, item.quality_signals = calculate_research_quality(
+                item, source_reliability=source_reliability
+            )
             item.analysis_status = "completed"
             item.analyzed_at = datetime.now(UTC)
             metadata = dict(item.metadata_json or {})

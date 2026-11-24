@@ -54,7 +54,9 @@ def parse_research_analysis(content: str) -> ResearchAnalysis:
     try:
         payload = json.loads(content)
     except json.JSONDecodeError as exc:
-        raise ValueError("The AI provider returned invalid JSON for research analysis.") from exc
+        raise ValueError(
+            "The AI provider returned invalid JSON for research analysis."
+        ) from exc
 
     if not isinstance(payload, dict):
         raise ValueError("The AI provider research analysis must be a JSON object.")
@@ -110,7 +112,8 @@ class OpenAICompatibleResearchAnalyzer:
             "guessing. Keep key points concise and non-duplicative, with no more than "
             "five points. Score relevance to a technology, AI, software and developer-"
             "focused social media brand from 0.0 (not relevant) to 1.0 (highly relevant). "
-            "Return only JSON with summary, topic, language, relevance_score, and key_points."
+            "Return only JSON with summary, topic, language, relevance_score, "
+            "and key_points."
         )
         response = await self.client.chat.completions.create(
             model=self.model,

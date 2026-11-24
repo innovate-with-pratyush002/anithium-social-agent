@@ -15,6 +15,7 @@ async def test_source_crud_and_duplicate_conflict(client: AsyncClient) -> None:
     source_id = source["id"]
     assert source["name"] == payload["name"]
     assert source["is_active"] is True
+    assert source["reliability_score"] == 0.7
 
     duplicate = await client.post("/api/v1/sources", json=payload)
     assert duplicate.status_code == 409
@@ -30,6 +31,17 @@ async def test_source_crud_and_duplicate_conflict(client: AsyncClient) -> None:
     )
     assert updated.status_code == 200
     assert updated.json()["description"] == "Updated research feed"
+
+    reliability_update = await client.patch(
+        f"/api/v1/sources/{source_id}", json={"reliability_score": 0.91}
+    )
+    assert reliability_update.status_code == 200
+    assert reliability_update.json()["reliability_score"] == 0.91
+
+    invalid_reliability = await client.patch(
+        f"/api/v1/sources/{source_id}", json={"reliability_score": 1.2}
+    )
+    assert invalid_reliability.status_code == 422
 
     deactivated = await client.delete(f"/api/v1/sources/{source_id}")
     assert deactivated.status_code == 204

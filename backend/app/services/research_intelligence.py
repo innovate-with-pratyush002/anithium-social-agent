@@ -12,7 +12,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import get_settings
 from app.models.research_item import ResearchItem
 from app.models.source import Source
-from app.services.research_quality import calculate_research_quality
 from app.schemas.research_intelligence import (
     ResearchAnalysis,
     ResearchAnalysisResult,

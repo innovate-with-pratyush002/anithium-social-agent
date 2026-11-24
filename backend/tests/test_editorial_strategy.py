@@ -48,7 +48,9 @@ async def test_editorial_opportunities_provide_platform_specific_angles(
 ) -> None:
     research_id = await _create_analyzed_research(client)
 
-    response = await client.get("/api/v1/editorial/opportunities")
+    # The test database may contain older persistent records; request enough
+    # rows to ensure this newly created item is included in the response page.
+    response = await client.get("/api/v1/editorial/opportunities?limit=100")
     assert response.status_code == 200
     payload = response.json()
     assert payload["pagination"]["total"] >= 1
@@ -81,7 +83,7 @@ async def test_editorial_opportunities_exclude_platforms_with_existing_drafts(
     assert draft.status_code == 201
 
     response = await client.get(
-        "/api/v1/editorial/opportunities?platforms=linkedin&platforms=x"
+        "/api/v1/editorial/opportunities?platforms=linkedin&platforms=x&limit=100"
     )
     assert response.status_code == 200
     item = next(

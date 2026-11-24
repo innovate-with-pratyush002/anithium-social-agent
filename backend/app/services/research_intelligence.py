@@ -20,6 +20,7 @@ from app.schemas.research_intelligence import (
     ResearchTrend,
     ResearchTrendsResponse,
 )
+from app.services.research_quality import calculate_research_quality
 
 MAX_ANALYSIS_ATTEMPTS = 3
 _PROVIDER_SETTINGS = {

@@ -14,8 +14,8 @@ from app.api.v1.editorial import router as editorial_router
 from app.api.v1.research_ingestion import router as research_ingestion_router
 from app.api.v1.research_intelligence import router as research_intelligence_router
 from app.api.v1.research_items import router as research_items_router
-from app.api.v1.sources import router as sources_router
 from app.api.v1.scheduling import router as scheduling_router
+from app.api.v1.sources import router as sources_router
 from app.core.config import get_settings
 from app.db.session import engine
 

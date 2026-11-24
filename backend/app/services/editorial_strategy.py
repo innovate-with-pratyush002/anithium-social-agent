@@ -1,5 +1,5 @@
+from collections.abc import Sequence
 from datetime import UTC, datetime, timedelta
-from typing import Sequence
 from uuid import UUID
 
 from sqlalchemy import select
@@ -7,28 +7,37 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.content_draft import ContentDraft
 from app.models.research_item import ResearchItem
+from app.schemas.common import PageMeta
 from app.schemas.editorial import (
     ContentOpportunity,
     EditorialOpportunitiesResponse,
     PlatformOpportunity,
 )
-from app.schemas.common import PageMeta
 
 _PLATFORM_ANGLES = {
     "linkedin": {
-        "angle": "Translate the development into practical implications for developers and technology teams.",
-        "format": "insight_post",
+        "angle": (
+            "Translate the development into practical implications for developers "
+            "and technology teams."
+        ),
+        "suggested_format": "insight_post",
         "rationale": "Professional context and actionable implications suit a LinkedIn discussion.",
     },
     "instagram": {
         "angle": "Break the development into a simple visual explanation with one clear takeaway.",
-        "format": "educational_carousel",
+        "suggested_format": "educational_carousel",
         "rationale": "A visual, saveable explanation makes technical information easier to scan.",
     },
     "x": {
-        "angle": "Lead with the most useful verified takeaway, then add concise context and implications.",
-        "format": "short_post_or_thread",
-        "rationale": "A concise hook and focused follow-up points suit fast-moving X conversations.",
+        "angle": (
+            "Lead with the most useful verified takeaway, then add concise context "
+            "and implications."
+        ),
+        "suggested_format": "short_post_or_thread",
+        "rationale": (
+            "A concise hook and focused follow-up points suit fast-moving "
+            "X conversations."
+        ),
     },
 }
 

@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import func, select
+from sqlalchemy import func, literal, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.dependencies import require_admin
@@ -47,10 +47,14 @@ async def list_ranked_research(
     total = await session.scalar(
         select(func.count()).select_from(ResearchItem).where(*filters)
     )
+    combined_score = (
+        0.7 * func.coalesce(ResearchItem.relevance_score, 0.0)
+        + 0.3 * func.coalesce(ResearchItem.quality_score, 0.5)
+    )
     items = await session.scalars(
         select(ResearchItem)
         .where(*filters)
-        .order_by(ResearchItem.relevance_score.desc(), ResearchItem.discovered_at.desc())
+        .order_by(combined_score.desc(), ResearchItem.discovered_at.desc())
         .limit(limit)
         .offset(offset)
     )

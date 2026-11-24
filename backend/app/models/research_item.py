@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Index, Integer, String, Text, Uuid, func
+from sqlalchemy import JSON, DateTime, Float, ForeignKey, Index, Integer, String, Text, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -34,6 +34,8 @@ class ResearchItem(TimestampMixin, Base):
     language: Mapped[str] = mapped_column(String(12), default="en", nullable=False)
     status: Mapped[str] = mapped_column(String(24), default="new", nullable=False)
     relevance_score: Mapped[float | None]
+    quality_score: Mapped[float | None] = mapped_column(Float)
+    quality_signals: Mapped[list[str]] = mapped_column(JSON, default=list, nullable=False)
     analysis_status: Mapped[str] = mapped_column(String(20), default="pending", nullable=False)
     analysis_attempts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     analysis_error: Mapped[str | None] = mapped_column(Text)

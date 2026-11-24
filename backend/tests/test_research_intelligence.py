@@ -8,11 +8,12 @@ from app.services.research_intelligence import get_research_analyzer
 class FakeResearchAnalyzer:
     provider = "test-provider"
     model = "test-model"
+    topic = "Artificial Intelligence"
 
     async def analyze(self, item):
         return ResearchAnalysis(
             summary=f"Analysis summary for {item.title}. This is grounded in supplied metadata.",
-            topic="Artificial Intelligence",
+            topic=self.topic,
             language="en",
             relevance_score=0.92,
             key_points=["AI tooling", "Developer productivity"],
@@ -130,7 +131,9 @@ async def test_failed_analysis_retry_limit_is_enforced(client: AsyncClient) -> N
 async def test_research_trends_require_two_analyzed_items(client: AsyncClient) -> None:
     first_id = await _create_research_item(client)
     second_id = await _create_research_item(client)
-    app.dependency_overrides[get_research_analyzer] = lambda: FakeResearchAnalyzer()
+    analyzer = FakeResearchAnalyzer()
+    analyzer.topic = f"Isolated Test Trend {first_id}"
+    app.dependency_overrides[get_research_analyzer] = lambda: analyzer
     try:
         response = await client.post(
             "/api/v1/research-intelligence/analyze",
@@ -143,5 +146,9 @@ async def test_research_trends_require_two_analyzed_items(client: AsyncClient) -
 
     trends = await client.get("/api/v1/research-intelligence/trends")
     assert trends.status_code == 200
-    assert trends.json()["trends"][0]["topic"] == "Artificial Intelligence"
-    assert trends.json()["trends"][0]["item_count"] >= 2
+    matching_trend = next(
+        trend
+        for trend in trends.json()["trends"]
+        if trend["topic"] == analyzer.topic
+    )
+    assert matching_trend["item_count"] == 2

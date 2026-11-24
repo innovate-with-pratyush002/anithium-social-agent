@@ -18,7 +18,7 @@ Add transparent quality signals so the research queue can distinguish topical re
 - Source create/update accepts `reliability_score` from 0.0 to 1.0; source read returns it.
 - Research item read returns `quality_score` and `quality_signals`.
 - Existing source records receive reliability score 0.7 during migration.
-- Existing research items receive a null quality score and an empty quality-signal list; they are recalculated when analyzed again.
+- Existing research items receive a null quality score and an empty quality-signal list. Newly ingested items are scored immediately, and items analyzed after this migration are scored after AI analysis. Previously completed records remain unscored; the ranked endpoint uses a neutral 0.5 quality value for those legacy records until a future backfill/re-scoring operation is added.
 
 ## Important interpretation
 

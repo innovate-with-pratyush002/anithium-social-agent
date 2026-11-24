@@ -15,6 +15,7 @@ from app.api.v1.research_ingestion import router as research_ingestion_router
 from app.api.v1.research_intelligence import router as research_intelligence_router
 from app.api.v1.research_items import router as research_items_router
 from app.api.v1.scheduling import router as scheduling_router
+from app.api.v1.social_accounts import router as social_accounts_router
 from app.api.v1.sources import router as sources_router
 from app.core.config import get_settings
 from app.db.session import engine
@@ -56,6 +57,7 @@ app.include_router(content_generation_router, prefix=settings.api_v1_prefix)
 app.include_router(editorial_router, prefix=settings.api_v1_prefix)
 app.include_router(approvals_router, prefix=settings.api_v1_prefix)
 app.include_router(scheduling_router, prefix=settings.api_v1_prefix)
+app.include_router(social_accounts_router, prefix=settings.api_v1_prefix)
 
 
 @app.get("/", tags=["Root"])

@@ -1,7 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import JSON, Boolean, ForeignKey, String, Text, Uuid
+from sqlalchemy import JSON, Boolean, Float, ForeignKey, String, Text, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -22,6 +22,9 @@ class Source(TimestampMixin, Base):
     description: Mapped[str | None] = mapped_column(Text)
     config: Mapped[dict[str, Any]] = mapped_column(JSON, default=dict, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    reliability_score: Mapped[float] = mapped_column(
+        Float, default=0.7, server_default="0.7", nullable=False
+    )
     created_by_id: Mapped[uuid.UUID | None] = mapped_column(
         Uuid, ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True
     )

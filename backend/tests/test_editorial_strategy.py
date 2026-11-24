@@ -60,7 +60,9 @@ async def test_editorial_opportunities_provide_platform_specific_angles(
         "instagram",
         "x",
     }
-    assert all(entry["angle"] and entry["suggested_format"] for entry in item["available_platforms"])
+    assert all(
+        entry["angle"] and entry["suggested_format"] for entry in item["available_platforms"]
+    )
 
 
 async def test_editorial_opportunities_exclude_platforms_with_existing_drafts(

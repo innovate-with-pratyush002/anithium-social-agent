@@ -17,12 +17,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.research_item import ResearchItem
 from app.models.source import Source
-from app.services.research_quality import calculate_research_quality
 from app.schemas.research_ingestion import (
     ResearchIngestionRequest,
     ResearchIngestionResponse,
     SourceIngestionResult,
 )
+from app.services.research_quality import calculate_research_quality
 
 logger = logging.getLogger(__name__)
 MAX_FEED_BYTES = 2 * 1024 * 1024

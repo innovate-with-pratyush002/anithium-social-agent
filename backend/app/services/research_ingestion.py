@@ -17,6 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.research_item import ResearchItem
 from app.models.source import Source
+from app.services.research_quality import calculate_research_quality
 from app.schemas.research_ingestion import (
     ResearchIngestionRequest,
     ResearchIngestionResponse,
@@ -211,6 +212,9 @@ async def ingest_research(
                         "author": _plain_text(entry.get("author")),
                         "tags": tags[:20],
                     },
+                )
+                item.quality_score, item.quality_signals = calculate_research_quality(
+                    item, source_reliability=source.reliability_score
                 )
                 try:
                     async with session.begin_nested():
